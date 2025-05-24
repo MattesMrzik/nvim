@@ -69,5 +69,8 @@ return require('packer').startup(function(use)
 
 	    end,
     }
+    use("sindrets/diffview.nvim")
+    -- is a optional requirement for diffview.
+    use('nvim-tree/nvim-web-devicons')
 
 end)

@@ -3,29 +3,33 @@ brew install ripgrep
 
 # packer plugin manager
 git clone --depth 1 https://github.com/wbthomason/packer.nvim\
- ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+        ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 
- # rocks plugin manager
- nvim -u NORC -c "source https://raw.githubusercontent.com/nvim-neorocks/rocks.nvim/master/installer.lua"
- # follow instructions
- # brew install lua
+# rocks plugin manager
+        nvim -u NORC -c "source https://raw.githubusercontent.com/nvim-neorocks/rocks.nvim/master/installer.lua"
+# follow instructions
+# brew install lua
 
- # for rust lsp
- :Rocks install rustaceanvim
+# for rust lsp
+        :Rocks install rustaceanvim
 
- # install rust-analyzer
-sudo mv rust-analyzer-aarch64-apple-darwin /usr/local/bin/rust-analyzer
+# install rust-analyzer
+# sudo mv rust-analyzer-aarch64-apple-darwin /usr/local/bin/rust-analyzer
+# instead i now did
+        rustup component add rust-analyzer
 
 # install node
-brew install node
+        brew install node
 
-npm install -g neovim
+        npm install -g neovim
 
 # inside a venv, and point nvim to that python3 bin
-pip3 install pyvim
-pip3 install neovim
+        pip3 install pyvim
+        pip3 install neovim
 # fmt 
 # suggest used first, then fields, then methods
 # also loock at https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/ and sources
 
 # search symbols: if there are multiple defs in the same file, show to which struct it belongs 
+
+# todo: https://www.naseraleisa.com/posts/diff

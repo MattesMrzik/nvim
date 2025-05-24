@@ -1,4 +1,5 @@
 require'lspconfig'.rust_analyzer.setup {
+    cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
     settings = {
         ['rust-analyzer'] = {
             check = {
@@ -26,10 +27,8 @@ cmp.setup({
         ["<C-Space>"] = cmp.mapping.complete(),
         ["<C-e>"] = cmp.mapping.close(),
         ["<CR>"] = cmp.mapping.confirm(),
-        --["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
-        --["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
-        ["<Tab>"] = cmp.mapping.select_next_item(),
-        ["<S-Tab>"] =cmp.mapping.select_next_item(),
+        ["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
+        ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
     },
     sources =  {
         { name = 'nvim_lsp' },

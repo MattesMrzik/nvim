@@ -14,6 +14,7 @@ require('gitsigns').setup{
         vim.cmd.normal({']c', bang = true})
       else
         gitsigns.nav_hunk('next')
+        vim.cmd('normal! zz')
       end
     end)
 
@@ -22,6 +23,7 @@ require('gitsigns').setup{
         vim.cmd.normal({'[c', bang = true})
       else
         gitsigns.nav_hunk('prev')
+        vim.cmd('normal! zz')
       end
     end)
 

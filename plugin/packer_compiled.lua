@@ -124,6 +124,11 @@ _G.packer_plugins = {
     path = "/Users/mrzi/.local/share/nvim/site/pack/packer/start/cmp-tabnine",
     url = "https://github.com/tzachar/cmp-tabnine"
   },
+  ["diffview.nvim"] = {
+    loaded = true,
+    path = "/Users/mrzi/.local/share/nvim/site/pack/packer/start/diffview.nvim",
+    url = "https://github.com/sindrets/diffview.nvim"
+  },
   ["gitsigns.nvim"] = {
     config = { "\27LJ\2\n6\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\rgitsigns\frequire\0" },
     loaded = true,
@@ -151,6 +156,11 @@ _G.packer_plugins = {
     path = "/Users/mrzi/.local/share/nvim/site/pack/packer/start/nvim-treesitter",
     url = "https://github.com/nvim-treesitter/nvim-treesitter"
   },
+  ["nvim-web-devicons"] = {
+    loaded = true,
+    path = "/Users/mrzi/.local/share/nvim/site/pack/packer/start/nvim-web-devicons",
+    url = "https://github.com/nvim-tree/nvim-web-devicons"
+  },
   ["packer.nvim"] = {
     loaded = true,
     path = "/Users/mrzi/.local/share/nvim/site/pack/packer/start/packer.nvim",
@@ -174,7 +184,7 @@ _G.packer_plugins = {
   },
   ["trouble.nvim"] = {
     commands = { "Trouble" },
-    config = { "\27LJ\2\nœ\a\0\0\f\0\28\0M6\0\0\0'\2\1\0B\0\2\0029\0\2\0004\2\0\0B\0\2\0015\0\3\0006\1\4\0009\1\5\0019\1\6\1\18\2\1\0'\4\a\0'\5\b\0'\6\t\0006\a\4\0009\a\n\a'\t\v\0\18\n\0\0005\v\f\0B\a\4\0A\2\3\1\18\2\1\0'\4\a\0'\5\r\0'\6\14\0006\a\4\0009\a\n\a'\t\v\0\18\n\0\0005\v\15\0B\a\4\0A\2\3\1\18\2\1\0'\4\a\0'\5\16\0'\6\17\0006\a\4\0009\a\n\a'\t\v\0\18\n\0\0005\v\18\0B\a\4\0A\2\3\1\18\2\1\0'\4\a\0'\5\19\0'\6\20\0006\a\4\0009\a\n\a'\t\v\0\18\n\0\0005\v\21\0B\a\4\0A\2\3\1\18\2\1\0'\4\a\0'\5\22\0'\6\23\0006\a\4\0009\a\n\a'\t\v\0\18\n\0\0005\v\24\0B\a\4\0A\2\3\1\18\2\1\0'\4\a\0'\5\25\0'\6\26\0006\a\4\0009\a\n\a'\t\v\0\18\n\0\0005\v\27\0B\a\4\0A\2\3\1K\0\1\0\1\0\1\tdesc\28Quickfix List (Trouble)#<cmd>Trouble qflist toggle<cr>\15<leader>xQ\1\0\1\tdesc\28Location List (Trouble)$<cmd>Trouble loclist toggle<cr>\15<leader>xL\1\0\1\tdesc1LSP Definitions / references / ... (Trouble)?<cmd>Trouble lsp toggle focus=false win.position=right<cr>\15<leader>cl\1\0\1\tdesc\22Symbols (Trouble)0<cmd>Trouble symbols toggle focus=false<cr>\15<leader>cs\1\0\1\tdesc!Buffer Diagnostics (Trouble)5<cmd>Trouble diagnostics toggle filter.buf=0<cr>\15<leader>xX\1\0\1\tdesc\26Diagnostics (Trouble)\nforce\15tbl_extend(<cmd>Trouble diagnostics toggle<cr>\15<leader>xx\6n\bset\vkeymap\bvim\1\0\3\vsilent\2\tdesc\5\fnoremap\2\nsetup\ftrouble\frequire\0" },
+    config = { "\27LJ\2\n9\0\0\3\0\3\0\a6\0\0\0'\2\1\0B\0\2\0029\0\2\0004\2\0\0B\0\2\1K\0\1\0\nsetup\ftrouble\frequire\0" },
     loaded = false,
     needs_bufread = false,
     only_cond = false,
@@ -194,14 +204,14 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: gitsigns.nvim
-time([[Config for gitsigns.nvim]], true)
-try_loadstring("\27LJ\2\n6\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\rgitsigns\frequire\0", "config", "gitsigns.nvim")
-time([[Config for gitsigns.nvim]], false)
 -- Config for: rose-pine
 time([[Config for rose-pine]], true)
 try_loadstring("\27LJ\2\n9\0\0\3\0\3\0\0056\0\0\0009\0\1\0'\2\2\0B\0\2\1K\0\1\0\26colorscheme rose-pine\bcmd\bvim\0", "config", "rose-pine")
 time([[Config for rose-pine]], false)
+-- Config for: gitsigns.nvim
+time([[Config for gitsigns.nvim]], true)
+try_loadstring("\27LJ\2\n6\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\rgitsigns\frequire\0", "config", "gitsigns.nvim")
+time([[Config for gitsigns.nvim]], false)
 -- Config for: nvim-autopairs
 time([[Config for nvim-autopairs]], true)
 try_loadstring("\27LJ\2\n<\0\0\3\0\3\0\0066\0\0\0'\2\1\0B\0\2\0029\0\2\0B\0\1\1K\0\1\0\nsetup\19nvim-autopairs\frequire\0", "config", "nvim-autopairs")
