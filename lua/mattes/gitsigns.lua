@@ -65,3 +65,65 @@ require('gitsigns').setup{
     map({'o', 'x'}, 'ih', gitsigns.select_hunk)
   end
 }
+
+
+
+local function myf(file, line, debug)
+  local abs = vim.fn.fnamemodify(file, ':p')
+  local bufnr = vim.fn.bufnr(abs, true)
+
+  -- Save original window
+  local orig_win = vim.api.nvim_get_current_win()
+
+  -- Open temp window (horizontal or vertical depending on debug)
+  if debug then
+    vim.cmd('silent! topleft new')  -- horizontal, full width
+  else
+    vim.cmd('silent! topleft vnew') -- vertical, narrow
+  end
+
+  local temp_win = vim.api.nvim_get_current_win()
+  vim.api.nvim_win_set_buf(temp_win, bufnr)
+  vim.api.nvim_win_set_cursor(temp_win, { line, 0 })
+
+  -- Call Gitsigns stage_hunk as if cursor is on the hunk
+  vim.cmd('Gitsigns stage_hunk')
+
+  -- Close window if not debugging
+  if not debug then
+    vim.api.nvim_win_close(temp_win, true)
+    vim.api.nvim_set_current_win(orig_win)
+  end
+
+  return true
+end
+
+
+vim.keymap.set('n', '<leader>kk', function()
+  myf("lua/mattes/gitsigns.lua", 70)
+end, { desc = "Stage hunk at line 70 in gitsigns.lua" })
+
+local function get_diffview_file_and_line()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  -- Extract the relative file path after the last colon
+  print("bufname = ", bufname)
+  local rel_path = bufname:match("/:.*:(/.*)$")
+  print("rel_path = ", rel_path)
+  if not rel_path then
+    vim.notify("Could not extract file path from buffer name: " .. bufname, vim.log.levels.ERROR)
+    return nil
+  end
+  -- Get the current line number
+  local line = vim.api.nvim_win_get_cursor(0)[1]
+  print(rel_path, line)
+  return rel_path, line
+end
+
+vim.keymap.set('n', '<leader>ll', function()
+
+    local path, line = get_diffview_file_and_line()
+    myf(path, line)
+end, { desc = "Stage hunk at line 70 in gitsigns.lua" })
+
+-- make leader hs check if i am in diff view or not, if yes then call my funtion, else use the default stage hunk
+-- if in diff view but file panel getting the buffer name throughs an error. i can say: warn: you are in file view and not file, use leader k to switch to file

@@ -41,3 +41,4 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 # multiple cursors
 #https://github.com/nvim-telescope/telescope.nvim/issues/2695
 # vim.opt_local.wrap = false in diffview see their github
+# look at what fugitive does, can it also stage unstage stuff in some vizual mode

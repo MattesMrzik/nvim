@@ -4,31 +4,31 @@
 vim.cmd [[packadd packer.nvim]]
 
 return require('packer').startup(function(use)
-  -- Packer can manage itself
-  use 'wbthomason/packer.nvim'
+    -- Packer can manage itself
+    use 'wbthomason/packer.nvim'
 
-  use {
-	  'nvim-telescope/telescope.nvim', tag = '0.1.8',
-	  -- or                            , branch = '0.1.x',
-	  requires = { {'nvim-lua/plenary.nvim'} }
-  }
+    use {
+        'nvim-telescope/telescope.nvim', tag = '0.1.8',
+        -- or                            , branch = '0.1.x',
+        requires = { {'nvim-lua/plenary.nvim'} }
+    }
 
-  use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
+    use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
 
-  use({
-	  'rose-pine/neovim',
-	  as = 'rose-pine',
-	  config = function()
-		  vim.cmd('colorscheme rose-pine')
-	  end
-  })
+    use({
+        'rose-pine/neovim',
+        as = 'rose-pine',
+        config = function()
+            vim.cmd('colorscheme rose-pine')
+        end
+    })
 
-  use("mbbill/undotree")
-  use("tpope/vim-fugitive")
- 
-  use('neovim/nvim-lspconfig')
+    use("mbbill/undotree")
+    use("tpope/vim-fugitive")
 
-  use {
+    use('neovim/nvim-lspconfig')
+
+    use {
         "hrsh7th/nvim-cmp",
         requires = {
             "hrsh7th/cmp-buffer", "hrsh7th/cmp-nvim-lsp",
@@ -45,26 +45,26 @@ return require('packer').startup(function(use)
 
 
     use {
-	    "windwp/nvim-autopairs",
-	    config = function()
-		    require("nvim-autopairs").setup()
-	    end
+        "windwp/nvim-autopairs",
+        config = function()
+            require("nvim-autopairs").setup()
+        end
     }
 
     use {
-	    'lewis6991/gitsigns.nvim',
-	    config = function()
-		    require('gitsigns').setup()
-	    end
+        'lewis6991/gitsigns.nvim',
+        config = function()
+            require('gitsigns').setup()
+        end
     }
     use {
-	    "folke/trouble.nvim",
-	    cmd = { "Trouble" },
-	    config = function()
-		    require("trouble").setup({})
-	    end,
+        "folke/trouble.nvim",
+        cmd = { "Trouble" },
+        config = function()
+            require("trouble").setup({})
+        end,
     }
-   use("sindrets/diffview.nvim")
+    use("sindrets/diffview.nvim")
 
     -- is a optional requirement for diffview.
     use('nvim-tree/nvim-web-devicons')

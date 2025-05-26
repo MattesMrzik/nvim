@@ -263,7 +263,3 @@ vim.keymap.set("n", "<leader>k", function()
   end
 end, { noremap = true, silent = true, desc = "Toggle Diffview file panel or jump to diff" })
 
-vim.keymap.set("n", "<leader>gu", function()
-  require("gitsigns").reset_hunk()
-end, { desc = "Unstage Git hunk" })
-
