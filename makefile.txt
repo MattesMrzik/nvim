@@ -30,6 +30,14 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 # suggest used first, then fields, then methods
 # also loock at https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/ and sources
 
-# search symbols: if there are multiple defs in the same file, show to which struct it belongs 
+# maybe add  _signs_staged_enable = true, -- This might have enabled the unstaging of Gitsings diffview setup
 
+# search symbols: if there are multiple defs in the same file, show to which struct it belongs 
 # todo: https://www.naseraleisa.com/posts/diff
+# maybe use arrow keys instead of tab and shift tab to select between cmp suggestions
+# rename symbols
+# scroll view
+# hotkey for copy to system clipboard
+# multiple cursors
+#https://github.com/nvim-telescope/telescope.nvim/issues/2695
+# vim.opt_local.wrap = false in diffview see their github

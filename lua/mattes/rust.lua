@@ -1,3 +1,7 @@
+--vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+--  vim.lsp.handlers.hover,
+--  { border = "rounded" } -- You can also use "single", "double", etc.
+--)
 require'lspconfig'.rust_analyzer.setup {
     cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
     settings = {

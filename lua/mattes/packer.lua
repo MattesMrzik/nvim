@@ -62,14 +62,10 @@ return require('packer').startup(function(use)
 	    cmd = { "Trouble" },
 	    config = function()
 		    require("trouble").setup({})
-
-		    -- Keybindings
-
-
-
 	    end,
     }
-    use("sindrets/diffview.nvim")
+   use("sindrets/diffview.nvim")
+
     -- is a optional requirement for diffview.
     use('nvim-tree/nvim-web-devicons')
 
