@@ -43,9 +43,13 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 # vim.opt_local.wrap = false in diffview see their github
 # look at what fugitive does, can it also stage unstage stuff in some vizual mode
 # leader gr for grep with regrex
-# header to show me which impl or struct i am in
+# header to show me which impl or struct i am in, also add this to the preview of telescope
 
 
 
 brew install font-hack-nerd-font 
 # set is as font in the terminal
+
+
+brew install lua-language-server
+# make esc not open references

@@ -1,10 +1,14 @@
 local telescope = require("telescope")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
+local sorters = require("telescope.sorters")
+local fzy = require("telescope.algos.fzy")
+
 local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
 local lsp_util = vim.lsp.util
 
+local M = {}
 local kind_icons = {
     Text = "",
     Method = "",
@@ -31,7 +35,7 @@ local kind_icons = {
     Event = "",
     Operator = "",
     TypeParameter = "",
-    Object = "",
+    Trait = "",
 }
 
 local kind_highlights = {
@@ -60,6 +64,7 @@ local kind_highlights = {
   Event = "TelescopeSymbolEvent",
   Operator = "TelescopeSymbolOperator",
   TypeParameter = "TelescopeSymbolTypeParameter",
+  Trait = "TelescopeSymbolObject",
 }
 
 vim.api.nvim_set_hl(0, "TelescopeSymbolText",         { fg = "#f8f8f2" }) -- white
@@ -87,8 +92,12 @@ vim.api.nvim_set_hl(0, "TelescopeSymbolStruct",       { fg = "#fab387" }) -- pea
 vim.api.nvim_set_hl(0, "TelescopeSymbolEvent",        { fg = "#f38ba8" }) -- light red
 vim.api.nvim_set_hl(0, "TelescopeSymbolOperator",     { fg = "#ff5555" }) -- red
 vim.api.nvim_set_hl(0, "TelescopeSymbolTypeParameter",{ fg = "#b4befe" }) -- lavender
+vim.api.nvim_set_hl(0, "TelescopeSymbolObject",       { fg = "#b4bffe" }) -- lavender
+
 
 vim.api.nvim_set_hl(0, "TelescopeMyHint", {fg = "#434544"})
+vim.api.nvim_set_hl(0, "TelescopeAutoSearch", {fg = "#DBB0AF"})
+
 
 local ts_utils = require('nvim-treesitter.ts_utils')
 local function get_block_info(line)
@@ -128,7 +137,7 @@ end
 
 
 -- Create the custom picker
-local function custom_lsp_document_symbols()
+M.custom_lsp_document_symbols = function()
     vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, result, ctx, _)
         if err or not result then return end
 
@@ -149,16 +158,16 @@ local function custom_lsp_document_symbols()
         local displayer = entry_display.create({
             separator = " ",
             items = {
-                { width = 1 }, -- incon
+                { width = 2 }, -- incon
                 { width = 30},
-                { width = 30},
+                { width = 40},
                 { remaining = true }, -- preview or extra info
             },
         })
 
         local function make_entry(symbol)
             local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
-            if kind == "Interface" then
+            if kind == "Interface" or kind == "Object" then
                 kind = "Trait"
             end
             local icon = kind_icons[kind] or ""
@@ -182,14 +191,19 @@ local function custom_lsp_document_symbols()
             }
         end
 
+        local sorter = conf.generic_sorter({})
+
+        sorter.highlighter = function (a,b,c)
+            return fzy.positions(b,c:sub(0,32))
+        end
         pickers.new({}, {
-            prompt_title = "Custom Document Symbols",
+            prompt_title = "Document Symbols",
             finder = finders.new_table({
                 results = flat_symbols,
                 entry_maker = make_entry,
             }),
             previewer = conf.qflist_previewer({}),
-            sorter = conf.generic_sorter({}),
+            sorter = sorter,
             layout_config = {
                 horizontal = {
                     preview_width = 0.4, -- percent of total width; default is 0.5
@@ -199,6 +213,6 @@ local function custom_lsp_document_symbols()
     end)
 end
 
--- Create command to call it
-vim.api.nvim_create_user_command("CustomSymbols", custom_lsp_document_symbols, {})
+
+return M
 

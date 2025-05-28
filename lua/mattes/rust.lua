@@ -73,3 +73,12 @@ cmp.setup({
         },
     },
 })
+
+
+vim.api.nvim_create_autocmd('LspAttach', {
+	callback = function(ev)
+		vim.schedule(function()
+			pcall(vim.keymap.del, "n", "<Esc>")
+		end)
+	end
+})
