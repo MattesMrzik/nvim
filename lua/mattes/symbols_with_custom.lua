@@ -1,0 +1,204 @@
+local telescope = require("telescope")
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local entry_display = require("telescope.pickers.entry_display")
+local conf = require("telescope.config").values
+local lsp_util = vim.lsp.util
+
+local kind_icons = {
+    Text = "",
+    Method = "",
+    Function = "",
+    Constructor = "",
+    Field = "",
+    Variable = "󱄑",
+    Class = "",
+    Struct = "",
+    Interface = "",
+    Module = "",
+    Property = "ﰠ",
+    Unit = "",
+    Value = "",
+    Enum = "",
+    Keyword = "",
+    Snippet = "",
+    Color = "",
+    File = "",
+    Reference = "",
+    Folder = "",
+    EnumMember = "",
+    Constant = "",
+    Event = "",
+    Operator = "",
+    TypeParameter = "",
+    Object = "",
+}
+
+local kind_highlights = {
+  Text = "TelescopeSymbolText",
+  Method = "TelescopeSymbolMethod",
+  Function = "TelescopeSymbolFunction",
+  Constructor = "TelescopeSymbolConstructor",
+  Field = "TelescopeSymbolField",
+  Variable = "TelescopeSymbolVariable",
+  Class = "TelescopeSymbolClass",
+  Interface = "TelescopeSymbolInterface",
+  Module = "TelescopeSymbolModule",
+  Property = "TelescopeSymbolProperty",
+  Unit = "TelescopeSymbolUnit",
+  Value = "TelescopeSymbolValue",
+  Enum = "TelescopeSymbolEnum",
+  Keyword = "TelescopeSymbolKeyword",
+  Snippet = "TelescopeSymbolSnippet",
+  Color = "TelescopeSymbolColor",
+  File = "TelescopeSymbolFile",
+  Reference = "TelescopeSymbolReference",
+  Folder = "TelescopeSymbolFolder",
+  EnumMember = "TelescopeSymbolEnumMember",
+  Constant = "TelescopeSymbolConstant",
+  Struct = "TelescopeSymbolStruct",
+  Event = "TelescopeSymbolEvent",
+  Operator = "TelescopeSymbolOperator",
+  TypeParameter = "TelescopeSymbolTypeParameter",
+}
+
+vim.api.nvim_set_hl(0, "TelescopeSymbolText",         { fg = "#f8f8f2" }) -- white
+vim.api.nvim_set_hl(0, "TelescopeSymbolMethod",       { fg = "#50fa7b" }) -- green
+vim.api.nvim_set_hl(0, "TelescopeSymbolFunction",     { fg = "#ffb86c" }) -- orange
+vim.api.nvim_set_hl(0, "TelescopeSymbolConstructor",  { fg = "#ff79c6" }) -- pink
+vim.api.nvim_set_hl(0, "TelescopeSymbolField",        { fg = "#8be9fd" }) -- cyan
+vim.api.nvim_set_hl(0, "TelescopeSymbolVariable",     { fg = "#403e0b" }) -- yellow
+vim.api.nvim_set_hl(0, "TelescopeSymbolClass",        { fg = "#8be9fd" }) -- cyan
+vim.api.nvim_set_hl(0, "TelescopeSymbolInterface",    { fg = "#bd93f9" }) -- purple
+vim.api.nvim_set_hl(0, "TelescopeSymbolModule",       { fg = "#ff79c6" }) -- pink
+vim.api.nvim_set_hl(0, "TelescopeSymbolProperty",     { fg = "#66d9ef" }) -- light blue
+vim.api.nvim_set_hl(0, "TelescopeSymbolUnit",         { fg = "#bd93f9" }) -- purple
+vim.api.nvim_set_hl(0, "TelescopeSymbolValue",        { fg = "#f1fa8c" }) -- yellow
+vim.api.nvim_set_hl(0, "TelescopeSymbolEnum",         { fg = "#ffb86c" }) -- orange
+vim.api.nvim_set_hl(0, "TelescopeSymbolKeyword",      { fg = "#ff5555" }) -- red
+vim.api.nvim_set_hl(0, "TelescopeSymbolSnippet",      { fg = "#f8f8f2" }) -- white
+vim.api.nvim_set_hl(0, "TelescopeSymbolColor",        { fg = "#fab387" }) -- peach
+vim.api.nvim_set_hl(0, "TelescopeSymbolFile",         { fg = "#f8f8f2" }) -- white
+vim.api.nvim_set_hl(0, "TelescopeSymbolReference",    { fg = "#ffb86c" }) -- orange
+vim.api.nvim_set_hl(0, "TelescopeSymbolFolder",       { fg = "#94e2d5" }) -- teal
+vim.api.nvim_set_hl(0, "TelescopeSymbolEnumMember",   { fg = "#bd93f9" }) -- purple
+vim.api.nvim_set_hl(0, "TelescopeSymbolConstant",     { fg = "#f38ba8" }) -- light red
+vim.api.nvim_set_hl(0, "TelescopeSymbolStruct",       { fg = "#fab387" }) -- peach
+vim.api.nvim_set_hl(0, "TelescopeSymbolEvent",        { fg = "#f38ba8" }) -- light red
+vim.api.nvim_set_hl(0, "TelescopeSymbolOperator",     { fg = "#ff5555" }) -- red
+vim.api.nvim_set_hl(0, "TelescopeSymbolTypeParameter",{ fg = "#b4befe" }) -- lavender
+
+vim.api.nvim_set_hl(0, "TelescopeMyHint", {fg = "#434544"})
+
+local ts_utils = require('nvim-treesitter.ts_utils')
+local function get_block_info(line)
+    -- local node = ts_utils.get_node_at_cursor()
+    local node = vim.treesitter.get_node({bufnr = 0, pos = {line-1,0} })
+    local while_count = 0
+    local patterns = {
+        "^(impl.*)",
+        "(trait .*)",   -- match e.g. "(trait MyTrait)"
+        "(struct .*)",  -- match e.g. "(struct MyStruct)"
+    }
+    while node do
+        while_count = while_count +1
+        if while_count > 10 then 
+            break
+        end
+        --print("node range = ", vim.treesitter.get_node_range(node))
+        local start_row, start_col, end_row, end_col = vim.treesitter.get_node_range(node)
+        --print("start_row = ", start_row)   
+        local lines = vim.api.nvim_buf_get_lines(0, start_row-1, start_row + 10, false)
+        local found = false
+        for i, line in pairs(lines) do
+            print("line = ", line)
+            if i > 10 then 
+                break
+            end
+            for i, pat in pairs(patterns) do
+                local m = line:match(pat)
+                if m ~= nil then 
+                    return m
+                end
+            end
+        end
+        node = node:parent()
+    end
+end
+
+
+-- Create the custom picker
+local function custom_lsp_document_symbols()
+    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, result, ctx, _)
+        if err or not result then return end
+
+        -- Flatten nested symbols (recursive helper)
+        local function flatten_symbols(symbols, result)
+            for _, symbol in ipairs(symbols) do
+                table.insert(result, symbol)
+                if symbol.children then
+                    flatten_symbols(symbol.children, result)
+                end
+            end
+        end
+
+        local flat_symbols = {}
+        flatten_symbols(result, flat_symbols)
+
+        -- Telescope entry display
+        local displayer = entry_display.create({
+            separator = " ",
+            items = {
+                { width = 1 }, -- incon
+                { width = 30},
+                { width = 30},
+                { remaining = true }, -- preview or extra info
+            },
+        })
+
+        local function make_entry(symbol)
+            local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
+            if kind == "Interface" then
+                kind = "Trait"
+            end
+            local icon = kind_icons[kind] or ""
+            local hl = kind_highlights[kind] or ""
+            local detail = symbol.detail or ""
+            local custom = get_block_info(symbol.range.start.line+1) or ""
+            return {
+                value = symbol,
+                ordinal = symbol.name .. " " .. kind, -- i can search "method" and it then only displays methods
+                display = function()
+                    return displayer({
+                        { icon , hl },
+                        symbol.name,
+                        {custom, "TelescopeMyHint"},
+                        {detail, "TelescopeMyHint"},
+                    })
+                end,
+                lnum = symbol.range.start.line + 1,
+                col = symbol.range.start.character + 1,
+                filename = vim.api.nvim_buf_get_name(0),
+            }
+        end
+
+        pickers.new({}, {
+            prompt_title = "Custom Document Symbols",
+            finder = finders.new_table({
+                results = flat_symbols,
+                entry_maker = make_entry,
+            }),
+            previewer = conf.qflist_previewer({}),
+            sorter = conf.generic_sorter({}),
+            layout_config = {
+                horizontal = {
+                    preview_width = 0.4, -- percent of total width; default is 0.5
+                },
+            },
+        }):find()
+    end)
+end
+
+-- Create command to call it
+vim.api.nvim_create_user_command("CustomSymbols", custom_lsp_document_symbols, {})
+
