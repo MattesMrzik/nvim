@@ -53,3 +53,18 @@ brew install font-hack-nerd-font
 
 brew install lua-language-server
 # make esc not open references
+# telescope not only fzy for finding but if all the the same fzy score (not locking at length or sth liek this ) can u use sth like most recently used?
+# also make an option to search for symbols globally, then i can print not only to which block but also to which file it belongs to, (and maybe ignore tests)
+# if selected suggestion is the same as the text dont use return to accexpt but write an actual return
+
+
+# see vim.g._ts_force_sync_parsing = true  and https://github.com/neovim/neovim/issues/32660
+
+# see init.lua , maybe the rust-analyzer formatter (not rustfmt) is also still run
+cargo fmt and rustfmt behavior is different. cargo fmt always update all rust files but rustfmt only update mentioned files
+cargo fmt -- ./a.rs # it also format b.rs 
+rustfmt ./a.rs # only format a.rs
+
+# make word end on _
+
+# cmp colors see https://github.com/catppuccin/nvim/discussions/323

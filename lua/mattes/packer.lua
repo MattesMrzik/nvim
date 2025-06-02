@@ -15,13 +15,17 @@ return require('packer').startup(function(use)
 
     use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
 
-    use({
-        'rose-pine/neovim',
-        as = 'rose-pine',
-        config = function()
-            vim.cmd('colorscheme rose-pine')
-        end
-    })
+    --use({
+        --'rose-pine/neovim',
+        --as = 'rose-pine',
+        --config = function()
+            --vim.cmd('colorscheme rose-pine')
+        --end
+    --})
+    -- In your packer startup function
+    --use {"catppuccin/nvim", as = "catppuccin"}
+    --vim.cmd.colorscheme "catppuccin"
+    use { "rebelot/kanagawa.nvim", as = "kanagawa"}
 
     use("mbbill/undotree")
     use("tpope/vim-fugitive")
@@ -68,5 +72,12 @@ return require('packer').startup(function(use)
 
     -- is a optional requirement for diffview.
     use('nvim-tree/nvim-web-devicons')
+
+    use("ravibrock/spellwarn.nvim")
+
+    --use {
+        --"rachartier/tiny-inline-diagnostic.nvim",
+	--as = "tiny-inline-diagnostic"
+    --}
 
 end)

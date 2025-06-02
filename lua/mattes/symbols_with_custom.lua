@@ -111,22 +111,21 @@ local function get_block_info(line)
     }
     while node do
         while_count = while_count +1
-        if while_count > 10 then 
+        if while_count > 10 then
             break
         end
         --print("node range = ", vim.treesitter.get_node_range(node))
         local start_row, start_col, end_row, end_col = vim.treesitter.get_node_range(node)
         --print("start_row = ", start_row)   
         local lines = vim.api.nvim_buf_get_lines(0, start_row-1, start_row + 10, false)
-        local found = false
         for i, line in pairs(lines) do
             print("line = ", line)
-            if i > 10 then 
+            if i > 10 then
                 break
             end
-            for i, pat in pairs(patterns) do
+            for _, pat in pairs(patterns) do
                 local m = line:match(pat)
-                if m ~= nil then 
+                if m ~= nil then
                     return m
                 end
             end
@@ -194,7 +193,7 @@ M.custom_lsp_document_symbols = function()
         local sorter = conf.generic_sorter({})
 
         sorter.highlighter = function (a,b,c)
-            return fzy.positions(b,c:sub(0,32))
+            return fzy.positions(b,c:sub(0,36))
         end
         pickers.new({}, {
             prompt_title = "Document Symbols",

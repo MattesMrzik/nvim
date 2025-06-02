@@ -18,6 +18,18 @@ require'lspconfig'.rust_analyzer.setup {
 
 local cmp = require("cmp")
 local types = require('cmp.types')
+local compare_kinds = function(kind, reverse)
+    return function(entry1, entry2)
+        local kind1 = entry1:get_kind()
+        local kind2 = entry2:get_kind()
+        if kind1 == kind and kind2 ~= kind then
+            return not reverse
+        elseif kind2 == kind and kind1 ~= kind then
+            return reverse
+        end
+        return nil
+    end
+end
 cmp.setup({
     preselect = cmp.PreselectMode.None,
     completion = {
@@ -42,29 +54,21 @@ cmp.setup({
     },
     sorting = {
         comparators = {
-            cmp.config.compare.recently_used,
-            function(entry1, entry2)
-                local kind1 = entry1:get_kind()
-                local kind2 = entry2:get_kind()
-                if kind1 == types.lsp.CompletionItemKind.Field and kind2 ~= types.lsp.CompletionItemKind.Field then
-                    return true
-                elseif kind2 == types.lsp.CompletionItemKind.Field and kind1 ~= types.lsp.CompletionItemKind.Field then
-                    return false
-                end
-                return nil
+            function (e1, e2)
+                return compare_kinds(types.lsp.CompletionItemKind.Text, true)(e1, e2)
             end,
-            function(entry1, entry2)
-                local kind1 = entry1:get_kind()
-                local kind2 = entry2:get_kind()
-                if kind1 == types.lsp.CompletionItemKind.Method and kind2 ~= types.lsp.CompletionItemKind.Method then
-                    return true
-                elseif kind2 == types.lsp.CompletionItemKind.Method and kind1 ~= types.lsp.CompletionItemKind.Method then
-                    return false
-                end
-                return nil
-            end,
-            cmp.config.compare.offset,
             cmp.config.compare.exact,
+            cmp.config.compare.recently_used,
+            cmp.config.compare.offset,
+            function(e1, e2)
+                return compare_kinds(types.lsp.CompletionItemKind.Field, false)(e1, e2)
+            end,
+            function(e1, e2)
+                return compare_kinds(types.lsp.CompletionItemKind.Method, false)(e1, e2)
+            end,
+            function(e1, e2)
+                return compare_kinds(types.lsp.CompletionItemKind.Variable, false)(e1, e2)
+            end,
             cmp.config.compare.score,
             cmp.config.compare.kind,
             cmp.config.compare.sort_text,
