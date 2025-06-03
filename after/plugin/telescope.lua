@@ -23,6 +23,7 @@ vim.keymap.set('n', '<C-[>', '<cmd>Telescope lsp_references<CR>', { desc = "Sear
 local cs = require("mattes.symbols_with_custom")
 vim.keymap.set("n", "<leader>ss", function()
   local fname = vim.api.nvim_buf_get_name(0)
+  --vim.cmd("write")
   if fname:sub(-3) == ".rs" then
       cs.custom_lsp_document_symbols()
   else

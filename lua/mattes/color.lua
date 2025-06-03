@@ -10,7 +10,14 @@ require('kanagawa').setup({
     dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
     terminalColors = true,       -- define vim.g.terminal_color_{0,17}
     colors = {                   -- add/modify theme and palette colors
-        palette = {},
+        palette = {dragonBlack0 = "#0d0c0c",--#0d0c0c,
+        dragonBlack1 = "#12120f", --#12120f
+        dragonBlack2 = "#000000",--#1D1C19
+        dragonBlack3 = "#000000",-- this is background
+        dragonBlack4 = "#282727",
+        dragonBlack5 = "#393836",
+        dragonBlack6 = "#625e5a",
+    },
         theme = { wave = {}, lotus = {}, dragon = {}, all = { ui = {
                 bg_gutter = "none"
             }} },
@@ -31,7 +38,7 @@ require('kanagawa').setup({
 		    PmenuThumb = { bg = theme.ui.bg_p2 },
 	    }
     end,
-    theme = "wave",              -- Load "wave" theme
+    theme = "dragon",              -- Load "wave" theme
     background = {               -- map the value of 'background' option to a theme
         dark = "dragon",           -- try "dragon" !
         light = "lotus"

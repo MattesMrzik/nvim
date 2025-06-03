@@ -15,12 +15,9 @@ vim.opt.spelllang = { "en_us" }
 -- https://github.com/neovim/neovim/issues/32660 because of flickering
 vim.g._ts_force_sync_parsing = true
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = "*.rs",
-  callback = function()
-    vim.cmd("silent !cargo fmt")
-  end,
-})
-
 
 --vim.cmd('colorscheme rose-pine')
+vim.o.signcolumn = "yes:2"
+
+vim.lsp.inlay_hint.enable(true)
+

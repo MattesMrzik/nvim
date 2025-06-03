@@ -11,10 +11,16 @@ require'lspconfig'.rust_analyzer.setup {
             },
             diagnostics = {
                 enable = true;
-            }
+            },
         }
-    }
+    },
+    on_attach = function(client, bufnr)
+        vim.defer_fn(function()
+            vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end, 4000)
+    end,
 }
+
 
 local cmp = require("cmp")
 local types = require('cmp.types')
@@ -86,3 +92,15 @@ vim.api.nvim_create_autocmd('LspAttach', {
 		end)
 	end
 })
+
+vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
+vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "*.rs",
+  callback = function()
+    vim.cmd("silent !cargo fmt")
+  end,
+})
+
+
