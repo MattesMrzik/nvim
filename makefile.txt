@@ -1,4 +1,5 @@
 # the builtin.grep_string called by leader fs wasnt working, this fixed it for mac
+
 brew install ripgrep
 
 # packer plugin manager
@@ -68,3 +69,15 @@ rustfmt ./a.rs # only format a.rs
 # make word end on _
 
 # cmp colors see https://github.com/catppuccin/nvim/discussions/323
+# make go to implementation jump to the trait def bec from there i can jump to its calls
+# if search symbold and type method or funtion then sort by line number
+# maybe make arrow keys select item from the completion list
+
+# transparent to slideshow of nice places
+# is this aslo possible in obsidian?
+vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
+
+# make lsp references not list the definition 
+
+nvim-treesitter/playground
+:TSInstall query

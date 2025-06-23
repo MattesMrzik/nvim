@@ -15,7 +15,7 @@ require('kanagawa').setup({
         dragonBlack2 = "#000000",--#1D1C19
         dragonBlack3 = "#000000",-- this is background
         dragonBlack4 = "#282727",
-        dragonBlack5 = "#393836",
+        dragonBlack5 = "#1f1e1c",-- 393836 this is the current line highligh and maybe something else
         dragonBlack6 = "#625e5a",
     },
         theme = { wave = {}, lotus = {}, dragon = {}, all = { ui = {

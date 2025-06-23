@@ -32,6 +32,7 @@ return require('packer').startup(function(use)
 
     use('neovim/nvim-lspconfig')
 
+    use('SirVer/ultisnips')
     use {
         "hrsh7th/nvim-cmp",
         requires = {
@@ -79,5 +80,6 @@ return require('packer').startup(function(use)
         --"rachartier/tiny-inline-diagnostic.nvim",
 	--as = "tiny-inline-diagnostic"
     --}
+    use("nvim-treesitter/playground")
 
 end)
