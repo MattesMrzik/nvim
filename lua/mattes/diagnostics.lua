@@ -2,7 +2,7 @@ local diagnostics_type = 0
 
 vim.diagnostic.config({
     virtual_lines = false,
-    virtual_text = false, -- optional: hide virtual_text when lines are on
+    virtual_text = true,
 })
 local function wrap_diagnostic(msg, max_width)
     local lines = {}
@@ -77,12 +77,12 @@ vim.keymap.set("n", "<leader>zz", function()
 end, {desc = "Toggle virtual_lines debug"})
 
 vim.keymap.set("n", "<leader>d", function()
-    diagnostics_type = (diagnostics_type + 1) % 2
+    diagnostics_type = (diagnostics_type + 1) %2
     local virtual_lines_enabled = false
     local virtual_text_enabled = false
     if diagnostics_type == 1 then
         vim.diagnostic.config({
-            --virtual_text = virtual_text_enabled, -- optional: hide virtual_text when lines are on
+            virtual_text = false,
             virtual_lines = {
                 only_current_line = false,
                 severity = nil,
@@ -94,8 +94,13 @@ vim.keymap.set("n", "<leader>d", function()
                 end,
             }
         })
-    else 
-        vim.diagnostic.config({virtual_lines = false})
+    else
+        vim.diagnostic.config({
+            virtual_text = true,
+            virtual_lines= false,
+        })
+    --else
+     --vim.diagnostic.config({virtual_lines = false})
     end
 
 end, { desc = "Toggle virtual lines" })

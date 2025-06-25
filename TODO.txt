@@ -1,0 +1,33 @@
+# make word end on _
+# if search symbold and type method or funtion then sort by line number
+# maybe make arrow keys select item from the completion list
+
+# scroll view
+# multiple cursors
+
+# look at what fugitive does, can it also stage unstage stuff in some vizual mode
+# leader gr for grep with regrex
+# header to show me which impl or struct i am in, also add this to the preview of telescope
+
+# telescope not only fzy for finding but if all the same fzy score (not locking at length or sth liek this ) can u use sth like most recently used?
+# also make an option to search for symbols globally, then i can print not only to which block but also to which file it belongs to, (and maybe ignore tests)
+# if selected suggestion is the same as the text dont use return to accexpt but write an actual return
+
+# see init.lua , maybe the rust-analyzer formatter (not rustfmt) is also still run
+
+
+
+# make lsp references not list the definitions
+
+
+# cmp colors see https://github.com/catppuccin/nvim/discussions/323
+# make go to implementation jump to the trait def bec from there i can jump to its calls
+
+# make lsp referneces of the trait definition maybe only list where the method is called as the trait and not on a specific implementation of that trait
+
+# suggest used first, then fields, then methods
+# also loock at https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/ and sources
+
+# leader im shows block only if its in the same current buffer
+
+# make leader fs jump direclty if there is only one mathc

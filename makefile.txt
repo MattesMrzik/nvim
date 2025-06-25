@@ -27,57 +27,17 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 # inside a venv, and point nvim to that python3 bin
         pip3 install pyvim
         pip3 install neovim
-# fmt 
-# suggest used first, then fields, then methods
-# also loock at https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/ and sources
 
 # maybe add  _signs_staged_enable = true, -- This might have enabled the unstaging of Gitsings diffview setup
-
-# search symbols: if there are multiple defs in the same file, show to which struct it belongs 
 # todo: https://www.naseraleisa.com/posts/diff
-# maybe use arrow keys instead of tab and shift tab to select between cmp suggestions
-# rename symbols
-# scroll view
-# hotkey for copy to system clipboard
-# multiple cursors
-#https://github.com/nvim-telescope/telescope.nvim/issues/2695
+
+
 # vim.opt_local.wrap = false in diffview see their github
-# look at what fugitive does, can it also stage unstage stuff in some vizual mode
-# leader gr for grep with regrex
-# header to show me which impl or struct i am in, also add this to the preview of telescope
-
-
 
 brew install font-hack-nerd-font 
 # set is as font in the terminal
 
-
 brew install lua-language-server
-# make esc not open references
-# telescope not only fzy for finding but if all the the same fzy score (not locking at length or sth liek this ) can u use sth like most recently used?
-# also make an option to search for symbols globally, then i can print not only to which block but also to which file it belongs to, (and maybe ignore tests)
-# if selected suggestion is the same as the text dont use return to accexpt but write an actual return
-
-
-# see vim.g._ts_force_sync_parsing = true  and https://github.com/neovim/neovim/issues/32660
-
-# see init.lua , maybe the rust-analyzer formatter (not rustfmt) is also still run
-cargo fmt and rustfmt behavior is different. cargo fmt always update all rust files but rustfmt only update mentioned files
-cargo fmt -- ./a.rs # it also format b.rs 
-rustfmt ./a.rs # only format a.rs
-
-# make word end on _
-
-# cmp colors see https://github.com/catppuccin/nvim/discussions/323
-# make go to implementation jump to the trait def bec from there i can jump to its calls
-# if search symbold and type method or funtion then sort by line number
-# maybe make arrow keys select item from the completion list
-
-# transparent to slideshow of nice places
-# is this aslo possible in obsidian?
-vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
-
-# make lsp references not list the definition 
 
 nvim-treesitter/playground
 :TSInstall query

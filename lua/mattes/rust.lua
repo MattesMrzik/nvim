@@ -6,6 +6,7 @@ require'lspconfig'.rust_analyzer.setup {
     cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
     settings = {
         ['rust-analyzer'] = {
+            semanticHighlighting = false,
             check = {
                 command = "clippy";
             },
@@ -64,8 +65,9 @@ cmp.setup({
                 return compare_kinds(types.lsp.CompletionItemKind.Text, true)(e1, e2)
             end,
             cmp.config.compare.exact,
-            cmp.config.compare.recently_used,
             cmp.config.compare.offset,
+            cmp.config.compare.score,
+            cmp.config.compare.recently_used,
             function(e1, e2)
                 return compare_kinds(types.lsp.CompletionItemKind.Field, false)(e1, e2)
             end,
@@ -75,7 +77,6 @@ cmp.setup({
             function(e1, e2)
                 return compare_kinds(types.lsp.CompletionItemKind.Variable, false)(e1, e2)
             end,
-            cmp.config.compare.score,
             cmp.config.compare.kind,
             cmp.config.compare.sort_text,
             cmp.config.compare.length,
@@ -103,4 +104,33 @@ vim.api.nvim_create_autocmd("BufWritePost", {
   end,
 })
 
+
+local ts_utils = require("nvim-treesitter.ts_utils")
+
+function JumpToTrait()
+    local node = ts_utils.get_node_at_cursor()
+    while node do
+        print("node type = " .. node:type())
+        if node:type() == "impl_item" then
+            for child in node:iter_children() do
+                print("child type = ", child:type())
+                local text = vim.treesitter.get_node_text(child, 0)
+                local row, col = child:range()
+                print("range = " .. row .. ", " .. col)
+                print("text =", text)
+                print("")
+                if child:type() == "type_identifier" or child:type() == "generic_type" then
+                    local row, col = child:range()
+                    vim.api.nvim_win_set_cursor(0, { row + 1, col + 1 })
+                    vim.lsp.buf.definition()
+                    return
+                end
+            end
+        end
+        node = node:parent()
+    end
+    print("No trait found in current impl block.")
+end
+
+vim.keymap.set("n", "<leader>gt", JumpToTrait, { desc = "Go to trait definition from impl" })
 
