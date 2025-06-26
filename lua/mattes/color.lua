@@ -104,11 +104,11 @@ local current = 0
 
 function M.my_toggle_theme()
     if current == 0 then
-        vim.notify("Switching to lotus")
+        vim.notify("Switching to theme kanagawa-lotus")
         vim.cmd("colorscheme kanagawa-lotus")
         current = 1
     else
-        vim.notify("Switching to dragon")
+        vim.notify("Switching to theme kanagawa-dragon")
         require("kanagawa").setup({ theme = "dragon" })
         vim.cmd("colorscheme kanagawa")
 	vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')

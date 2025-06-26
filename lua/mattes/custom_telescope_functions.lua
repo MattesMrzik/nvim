@@ -172,14 +172,10 @@ M.custom_lsp_document_symbols = function()
 end
 
 local function filter_function_defs_from_references(references)
-    print("before sorting")
     local filtered_references = vim.tbl_filter(function(reference)
         local filename = vim.uri_to_fname(reference.uri)
         local lnum = reference.range.start.line
         local col = reference.range.start.character
-        print("file = " .. filename)
-        print("lnum = " .. lnum)
-        print("col = " .. col)
         local bufnr = vim.fn.bufnr(filename)
         if bufnr == -1 then
             -- buffer is not open -> get bufnr
@@ -294,11 +290,6 @@ local function load_buffer_and_treesitter_parse(filename)
         end
         vim.fn.bufload(bufnr)
     end
-    if vim.fn.bufloaded(bufnr) ~= 1 then
-        print("still not loaded")
-    else
-        print("now loaded")
-    end
     return bufnr
 end
 
@@ -368,7 +359,7 @@ M.custom_lsp_implementations = function()
             previewer = conf.qflist_previewer({}),
             sorter = sorter,
             layout_config = {
-                horizontal = { preview_width = 0.6 },
+                horizontal = { preview_width = 0.4 },
             },
         }):find()
     end)

@@ -15,22 +15,15 @@
 
 # see init.lua , maybe the rust-analyzer formatter (not rustfmt) is also still run
 
-
-
-# make lsp references not list the definitions
-
-
 # cmp colors see https://github.com/catppuccin/nvim/discussions/323
 # make go to implementation jump to the trait def bec from there i can jump to its calls
 
 # make lsp referneces of the trait definition maybe only list where the method is called as the trait and not on a specific implementation of that trait
 
 # suggest used first, then fields, then methods
-# also loock at https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/ and sources
+# also look at https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/ and sources
 
-# leader im shows block only if its in the same current buffer
-
-# make leader fs jump direclty if there is only one mathc
+# make leader fs jump direclty if there is only one match
 
 # if >fs is only one hit that goto it
 

@@ -40,7 +40,7 @@ vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find f
 vim.keymap.set('n', '<leader>fg', builtin.git_files, { desc = 'Telescope find files' })
 vim.keymap.set("n", "<leader>ws", require("telescope.builtin").lsp_workspace_symbols, { desc = "Workspace Symbols" })
 vim.keymap.set('n', '<leader>fs', function() builtin.grep_string({ search = vim.fn.input("Grep > ") }); end)
-local cs = require("mattes.symbols_with_custom")
+local cs = require("mattes.custom_telescope_functions")
 vim.keymap.set("n", "<leader>ss", function()
   local fname = vim.api.nvim_buf_get_name(0)
   --vim.cmd("write")

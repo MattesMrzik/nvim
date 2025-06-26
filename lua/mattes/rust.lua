@@ -99,23 +99,112 @@ cmp.setup({
 -- utility method used in remap.lua
 local ts_utils = require("nvim-treesitter.ts_utils")
 local M = {}
+
 function M.jump_to_trait()
     local node = ts_utils.get_node_at_cursor()
+    local fn_name = nil
+
+    -- Step 1: Find function_item and extract function name
+    local search_node = node
+    while search_node do
+        if search_node:type() == "function_item" then
+            for child in search_node:iter_children() do
+                if child:type() == "identifier" then
+                    fn_name = vim.treesitter.get_node_text(child, 0)
+                    break
+                end
+            end
+            break
+        end
+        search_node = search_node:parent()
+    end
+
+    -- Step 2: Find the impl_item
     while node do
         if node:type() == "impl_item" then
             for child in node:iter_children() do
                 if child:type() == "type_identifier" or child:type() == "generic_type" then
                     local row, col = child:range()
                     vim.api.nvim_win_set_cursor(0, { row + 1, col + 1 })
-                    vim.lsp.buf.definition()
+
+                    local params = vim.lsp.util.make_position_params(nil, "utf-16")
+                    vim.lsp.buf_request(0, "textDocument/definition", params, function(_, result)
+                        if not result or vim.tbl_isempty(result) then
+                            print("No trait found.")
+                            return
+                        end
+
+                        result = result[1]
+                        local filename = vim.uri_to_fname(result.targetUri)
+                        local lnum = result.targetSelectionRange.start.line
+                        local col = result.targetSelectionRange.start.character
+                        local bufnr = vim.fn.bufnr(filename)
+                        if bufnr == -1 then bufnr = vim.fn.bufnr(filename, true) end
+                        if vim.fn.bufloaded(bufnr) ~= 1 then vim.fn.bufload(bufnr) end
+
+                        local parser = vim.treesitter.get_parser(bufnr, "rust")
+                        local tree = parser:parse()[1]
+                        if not tree then return end
+
+                        local trait_node = vim.treesitter.get_node({ bufnr = bufnr, pos = { lnum, col } })
+                        while trait_node and trait_node:type() ~= "trait_item" do
+                            trait_node = trait_node:parent()
+                        end
+                        if not trait_node then
+                            print("Not in a trait_item.")
+                            return
+                        end
+
+                        -- Find declaration_list body
+                        local body
+                        for cc in trait_node:iter_children() do
+                            if cc:type() == "declaration_list" then
+                                body = cc
+                                break
+                            end
+                        end
+
+                        if not body then
+                            print("No declaration_list found.")
+                            return
+                        end
+
+                        if not fn_name then
+                            -- no specific function, jump to start of trait
+                            vim.api.nvim_set_current_buf(bufnr)
+                            vim.api.nvim_win_set_cursor(0, { lnum, col})
+                            return
+                        end
+
+                        -- Step 3: search for function with matching name
+                        for sig in body:iter_children() do
+                            if sig:type() == "function_signature_item" then
+                                for subnode in sig:iter_children() do
+                                    if subnode:type() == "identifier" then
+                                        local text = vim.treesitter.get_node_text(subnode, bufnr)
+                                        if text == fn_name then
+                                            local srow, scol = subnode:range()
+                                            vim.api.nvim_set_current_buf(bufnr)
+                                            vim.api.nvim_win_set_cursor(0, { srow+1, scol})
+                                            return
+                                        end
+                                    end
+                                end
+                            end
+                        end
+
+                        print("Function not found in trait.")
+
+                    end)
                     return
                 end
             end
         end
         node = node:parent()
     end
-    print("No trait found in current impl block.")
-end
-return M
 
+    print("No impl block found.")
+end
+
+return M
 
