@@ -64,6 +64,22 @@ require('gitsigns').setup{
 
 
 
+
+
+
+
+
+
+
+
+-- this is still unpolished
+--
+
+
+
+
+
+
 local function myf(file, line, debug)
     local abs = vim.fn.fnamemodify(file, ':p')
     local bufnr = vim.fn.bufnr(abs, true)

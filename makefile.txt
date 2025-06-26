@@ -29,6 +29,7 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
         pip3 install neovim
 
 # maybe add  _signs_staged_enable = true, -- This might have enabled the unstaging of Gitsings diffview setup
+# this is also done in diffview.lua, so its probably not needed anymore 
 # todo: https://www.naseraleisa.com/posts/diff
 
 

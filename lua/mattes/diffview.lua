@@ -1,13 +1,8 @@
-local map = vim.keymap.set
-
-map('n', '<leader>jo', ':DiffviewOpen<CR>', { desc = 'Diffview Open' })
-map('n', '<leader>jc', ':DiffviewClose<CR>', { desc = 'Diffview Close' })
-
--- Lua
 local actions = require("diffview.actions")
 
+-- this is a copy from https://github.com/sindrets/diffview.nvim
+-- and its used to reset some of the default keymaps 
 require("diffview").setup({
-  _signs_staged_enable = true, -- This might have enabled the unstaging of Gitsings
   diff_binaries = false,    -- Show diffs for binaries
   enhanced_diff_hl = false, -- See |diffview-config-enhanced_diff_hl|
   git_cmd = { "git" },      -- The git executable followed by default args.
@@ -96,7 +91,7 @@ require("diffview").setup({
   },
   hooks = {},         -- See |diffview-config-hooks|
   keymaps = {
-    disable_defaults = true, -- Disable the default keymaps
+    disable_defaults = true, -- i mattes set this to true 
     view = {
       -- The `view` bindings are active in the diff buffers, only when the current
       -- tabpage is a Diffview.
@@ -107,7 +102,7 @@ require("diffview").setup({
       { "n", "gf",          actions.goto_file_edit,                 { desc = "Open the file in the previous tabpage" } },
       { "n", "<C-w><C-f>",  actions.goto_file_split,                { desc = "Open the file in a new split" } },
       { "n", "<C-w>gf",     actions.goto_file_tab,                  { desc = "Open the file in a new tabpage" } },
-      { "n", "<leader>jn",  vim.cmd("wincmd l"),                    { desc = "Bring focus to the file panel" } },
+      { "n", "<leader>jn",  vim.cmd("wincmd l"),                    { desc = "(i mattes changed this) Bring focus to the file panel" } },
       { "n", "<leader>b",   actions.toggle_files,                   { desc = "Toggle the file panel." } },
       { "n", "g<C-x>",      actions.cycle_layout,                   { desc = "Cycle through available layouts." } },
       { "n", "[x",          actions.prev_conflict,                  { desc = "In the merge-tool: jump to the previous conflict" } },
@@ -177,7 +172,7 @@ require("diffview").setup({
       { "n", "i",              actions.listing_style,                  { desc = "Toggle between 'list' and 'tree' views" } },
       { "n", "f",              actions.toggle_flatten_dirs,            { desc = "Flatten empty subdirectories in tree listing style" } },
       { "n", "R",              actions.refresh_files,                  { desc = "Update stats and entries in the file list" } },
-      { "n", "<leader>jn",     vim.cmd("wincmd l"),                    { desc = "Bring focus to the file panel" } },
+      { "n", "<leader>jn",     vim.cmd("wincmd l"),                    { desc = "(i mattes changed this) Bring focus to the file panel" } },
       { "n", "<leader>b",      actions.toggle_files,                   { desc = "Toggle the file panel" } },
       { "n", "g<C-x>",         actions.cycle_layout,                   { desc = "Cycle available layouts" } },
       { "n", "[x",             actions.prev_conflict,                  { desc = "Go to the previous conflict" } },
@@ -218,7 +213,7 @@ require("diffview").setup({
       { "n", "gf",            actions.goto_file_edit,              { desc = "Open the file in the previous tabpage" } },
       { "n", "<C-w><C-f>",    actions.goto_file_split,             { desc = "Open the file in a new split" } },
       { "n", "<C-w>gf",       actions.goto_file_tab,               { desc = "Open the file in a new tabpage" } },
-      { "n", "<leader>jn",    vim.cmd("wincmd l"),                 { desc = "Bring focus to the file panel" } },
+      { "n", "<leader>jn",    vim.cmd("wincmd l"),                 { desc = "(i mattes changed this) Bring focus to the file panel" } },
       { "n", "<leader>b",     actions.toggle_files,                { desc = "Toggle the file panel" } },
       { "n", "g<C-x>",        actions.cycle_layout,                { desc = "Cycle available layouts" } },
       { "n", "g?",            actions.help("file_history_panel"),  { desc = "Open the help panel" } },
@@ -235,8 +230,9 @@ require("diffview").setup({
   },
 })
 
+local M = {}
 
-map('n', '<leader>jj', function()
+function M.toggle_diff_view()
   local view = require('diffview.lib').get_current_view()
   if view then
     vim.cmd('DiffviewClose')
@@ -245,10 +241,11 @@ map('n', '<leader>jj', function()
     vim.cmd('wincmd l')
     vim.cmd('wincmd l')
   end
-end, { desc = 'Diffview Toggle' })
+end
 
-
-vim.keymap.set("n", "<leader>k", function()
+-- since to stage files we need to be in the file overview pane
+-- and to scroll the diff view we need to be in the right pane
+function M.jump_between_right_file_and_file_over_view_pane()
   local cur_ft = vim.bo.filetype
   if cur_ft == "DiffviewFiles" then
     -- We're in the file panel → jump right twice
@@ -261,5 +258,6 @@ vim.keymap.set("n", "<leader>k", function()
     print("cur_ft = ",cur_ft,", focus files")
     vim.cmd("DiffviewFocusFiles")
   end
-end, { noremap = true, silent = true, desc = "Toggle Diffview file panel or jump to diff" })
+end
 
+return M

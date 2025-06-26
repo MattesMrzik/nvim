@@ -1,9 +1,8 @@
-local diagnostics_type = 0
-
 vim.diagnostic.config({
     virtual_lines = false,
     virtual_text = true,
 })
+-- helper to wrap the diagnostics text that is used in virtual_lines if the window width is too small
 local function wrap_diagnostic(msg, max_width)
     local lines = {}
     for s in msg:gmatch("[^\r\n]+") do
@@ -20,8 +19,11 @@ local function wrap_diagnostic(msg, max_width)
     end
     return table.concat(out_lines, "\n")
 end
+
+-- since we get can get the wrap_diagnostic text only based on buffer and not window
+-- we need to get the min window size of all windows that contain the buffer
 local function get_min_win_size(bufnr)
-    local m = 9999 
+    local m = 99999
     for _, w in ipairs(vim.api.nvim_list_wins()) do
         local buf_of_window = vim.api.nvim_win_get_buf(w)
         if buf_of_window == bufnr then
@@ -31,16 +33,18 @@ local function get_min_win_size(bufnr)
             end
         end
     end
-    return m-12
+    -- the minus 12 comes from the fact that the sign column and column for the line number 
+    -- additionally subtracts from the window width
+    return m - 12
 end
 
+-- the lsp inlay hints further push the diagnostics to the right and we need to take this into account
 local function get_inlay_width(bufnr, line)
     local inlay_ns = vim.api.nvim_get_namespaces()["nvim.lsp.inlayhint"]
     if not inlay_ns then return 0 end
 
     local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, inlay_ns, {line, 0}, {line, -1}, {details = true})
     local total_width = 0
-
     for _, mark in ipairs(extmarks) do
         local virt_text = mark[4] and mark[4].virt_text
         if virt_text then
@@ -50,11 +54,23 @@ local function get_inlay_width(bufnr, line)
             end
         end
     end
-
-    return total_width +2
+    -- the plus 2 come from the preceding and trailing space before and after the inlay hint (i think) 
+    return total_width + 2
 end
 
-vim.keymap.set("n", "<leader>zz", function()
+
+local M = {}
+local diagnostics_type = 0
+
+function M.disable_diagnostics()
+    vim.diagnostic.config({
+        virtual_lines = false,
+        virtual_text = false,
+    })
+end
+
+-- this is the same as debugging version of the true function below
+function M.diagnostics_debug()
     diagnostics_type = (diagnostics_type + 1) % 2
     local virtual_lines_enabled = false
     local virtual_text_enabled = false
@@ -74,12 +90,12 @@ vim.keymap.set("n", "<leader>zz", function()
     else 
         vim.diagnostic.config({virtual_lines = false})
     end
-end, {desc = "Toggle virtual_lines debug"})
+end
 
-vim.keymap.set("n", "<leader>d", function()
+-- toggles diagnostics
+function M.toggle_diagnostics()
+    -- either 2 or three, i would then also need to adjust the if else structure below
     diagnostics_type = (diagnostics_type + 1) %2
-    local virtual_lines_enabled = false
-    local virtual_text_enabled = false
     if diagnostics_type == 1 then
         vim.diagnostic.config({
             virtual_text = false,
@@ -99,8 +115,7 @@ vim.keymap.set("n", "<leader>d", function()
             virtual_text = true,
             virtual_lines= false,
         })
-    --else
-     --vim.diagnostic.config({virtual_lines = false})
     end
+end
 
-end, { desc = "Toggle virtual lines" })
+return M

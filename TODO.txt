@@ -31,3 +31,16 @@
 # leader im shows block only if its in the same current buffer
 
 # make leader fs jump direclty if there is only one mathc
+
+# if >fs is only one hit that goto it
+
+# unstage in diffview
+# gf in diffview jumps to wrong lines if called on partly staged files
+
+# when in visual mode (like after viw) be able to press " for example to enclose it in "
+
+# when i open nvim and lsp is not started yet, dont make stuff like find references or similar fail but instead show msg
+
+# in custom telescope where i show the bock info, can i also search that?
+
+# make custom jump to symbol go to the actual item and not the comment before that

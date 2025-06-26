@@ -1,12 +1,11 @@
-local telescope = require("telescope")
+--local telescope = require("telescope")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
-local sorters = require("telescope.sorters")
+--local sorters = require("telescope.sorters")
 local fzy = require("telescope.algos.fzy")
 
 local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
-local lsp_util = vim.lsp.util
 
 local M = {}
 local kind_icons = {
@@ -67,46 +66,16 @@ local kind_highlights = {
     Trait = "TelescopeSymbolObject",
 }
 
-vim.api.nvim_set_hl(0, "TelescopeSymbolText",         { fg = "#f8f8f2" }) -- white
-vim.api.nvim_set_hl(0, "TelescopeSymbolMethod",       { fg = "#50fa7b" }) -- green
-vim.api.nvim_set_hl(0, "TelescopeSymbolFunction",     { fg = "#ffb86c" }) -- orange
-vim.api.nvim_set_hl(0, "TelescopeSymbolConstructor",  { fg = "#ff79c6" }) -- pink
-vim.api.nvim_set_hl(0, "TelescopeSymbolField",        { fg = "#8be9fd" }) -- cyan
-vim.api.nvim_set_hl(0, "TelescopeSymbolVariable",     { fg = "#403e0b" }) -- yellow
-vim.api.nvim_set_hl(0, "TelescopeSymbolClass",        { fg = "#8be9fd" }) -- cyan
-vim.api.nvim_set_hl(0, "TelescopeSymbolInterface",    { fg = "#bd93f9" }) -- purple
-vim.api.nvim_set_hl(0, "TelescopeSymbolModule",       { fg = "#ff79c6" }) -- pink
-vim.api.nvim_set_hl(0, "TelescopeSymbolProperty",     { fg = "#66d9ef" }) -- light blue
-vim.api.nvim_set_hl(0, "TelescopeSymbolUnit",         { fg = "#bd93f9" }) -- purple
-vim.api.nvim_set_hl(0, "TelescopeSymbolValue",        { fg = "#f1fa8c" }) -- yellow
-vim.api.nvim_set_hl(0, "TelescopeSymbolEnum",         { fg = "#ffb86c" }) -- orange
-vim.api.nvim_set_hl(0, "TelescopeSymbolKeyword",      { fg = "#ff5555" }) -- red
-vim.api.nvim_set_hl(0, "TelescopeSymbolSnippet",      { fg = "#f8f8f2" }) -- white
-vim.api.nvim_set_hl(0, "TelescopeSymbolColor",        { fg = "#fab387" }) -- peach
-vim.api.nvim_set_hl(0, "TelescopeSymbolFile",         { fg = "#f8f8f2" }) -- white
-vim.api.nvim_set_hl(0, "TelescopeSymbolReference",    { fg = "#ffb86c" }) -- orange
-vim.api.nvim_set_hl(0, "TelescopeSymbolFolder",       { fg = "#94e2d5" }) -- teal
-vim.api.nvim_set_hl(0, "TelescopeSymbolEnumMember",   { fg = "#bd93f9" }) -- purple
-vim.api.nvim_set_hl(0, "TelescopeSymbolConstant",     { fg = "#f38ba8" }) -- light red
-vim.api.nvim_set_hl(0, "TelescopeSymbolStruct",       { fg = "#fab387" }) -- peach
-vim.api.nvim_set_hl(0, "TelescopeSymbolEvent",        { fg = "#f38ba8" }) -- light red
-vim.api.nvim_set_hl(0, "TelescopeSymbolOperator",     { fg = "#ff5555" }) -- red
-vim.api.nvim_set_hl(0, "TelescopeSymbolTypeParameter",{ fg = "#b4befe" }) -- lavender
-vim.api.nvim_set_hl(0, "TelescopeSymbolObject",       { fg = "#b4bffe" }) -- lavender
-
-
-vim.api.nvim_set_hl(0, "TelescopeMyHint", {fg = "#434544"})
-vim.api.nvim_set_hl(0, "TelescopeAutoSearch", {fg = "#DBB0AF"})
-
-
-local ts_utils = require('nvim-treesitter.ts_utils')
-local function get_block_info(line, bufnr)
-    -- local node = ts_utils.get_node_at_cursor()
-    if vim.fn.bufloaded(bufnr) ~= 1 then
-        print("not loaded")
-    else
-        print("loaded in get block info")
+local function flatten(symbols, result)
+    for _, symbol in ipairs(symbols) do
+        table.insert(result, symbol)
+        if symbol.children then
+            flatten(symbol.children, result)
+        end
     end
+end
+
+local function get_block_info(line, bufnr)
     local node = vim.treesitter.get_node({bufnr = bufnr, pos = {line-1,0} })
     local while_count = 0
     local patterns = {
@@ -115,14 +84,11 @@ local function get_block_info(line, bufnr)
         "(struct .*)",  -- match e.g. "(struct MyStruct)"
     }
     while node do
-        print("processing node")
         while_count = while_count +1
         if while_count > 10 then
             break
         end
-        --print("node range = ", vim.treesitter.get_node_range(node))
         local start_row, start_col, end_row, end_col = vim.treesitter.get_node_range(node)
-        --print("start_row = ", start_row)   
         local lines = vim.api.nvim_buf_get_lines(bufnr, start_row-1, start_row + 10, false)
         for i, line in pairs(lines) do
             if i > 10 then
@@ -139,32 +105,20 @@ local function get_block_info(line, bufnr)
     end
 end
 
-
--- Create the custom picker
 M.custom_lsp_document_symbols = function()
-    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, result, ctx, _)
-        if err or not result then return end
-
-        local function flatten_symbols(symbols, result)
-            for _, symbol in ipairs(symbols) do
-                table.insert(result, symbol)
-                if symbol.children then
-                    flatten_symbols(symbol.children, result)
-                end
-            end
-        end
+    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, ctx, _)
+        if err or not symbols then return end
 
         local flat_symbols = {}
-        flatten_symbols(result, flat_symbols)
+        flatten(symbols, flat_symbols)
 
-        -- Telescope entry display
         local displayer = entry_display.create({
             separator = " ",
             items = {
                 { width = 2 },
                 { width = 30},
                 { width = 40},
-                { remaining = true }, -- preview or extra info
+                { remaining = true },
             },
         })
 
@@ -188,14 +142,15 @@ M.custom_lsp_document_symbols = function()
                         {detail, "TelescopeMyHint"},
                     })
                 end,
-                lnum = symbol.range.start.line + 1,
-                col = symbol.range.start.character + 1,
+                lnum = symbol.selectionRange.start.line + 1,
+                col = symbol.selectionRange.start.character + 1,
                 filename = vim.api.nvim_buf_get_name(0),
             }
         end
 
         local sorter = conf.generic_sorter({})
 
+        -- the highlighter should only highlight the (first and) second col, ie where the name is in 
         sorter.highlighter = function (a,b,c)
             return fzy.positions(b,c:sub(0,36))
         end
@@ -216,58 +171,61 @@ M.custom_lsp_document_symbols = function()
     end)
 end
 
+local function filter_function_defs_from_references(references)
+    print("before sorting")
+    local filtered_references = vim.tbl_filter(function(reference)
+        local filename = vim.uri_to_fname(reference.uri)
+        local lnum = reference.range.start.line
+        local col = reference.range.start.character
+        print("file = " .. filename)
+        print("lnum = " .. lnum)
+        print("col = " .. col)
+        local bufnr = vim.fn.bufnr(filename)
+        if bufnr == -1 then
+            -- buffer is not open -> get bufnr
+            bufnr = vim.fn.bufnr(filename, true)
+        end
+
+        if vim.fn.bufloaded(bufnr) ~= 1 then
+            -- buffer with bufnr is not loaded -> load
+            vim.fn.bufload(bufnr)
+            local parser = vim.treesitter.get_parser(bufnr, "rust")
+            local tree = parser:parse()[1]
+            if not tree then
+                return nil
+            end
+        end
+        local node = vim.treesitter.get_node({bufnr = bufnr, pos = {lnum,col} })
+        if node:parent():type() =="function_item" then
+            return false
+        else
+            return true
+        end
+    end, references)
+    print("filtered " .. #references - #filtered_references)
+    return filtered_references
+end
 
 M.custom_lsp_references = function()
     local params = vim.lsp.util.make_position_params(nil, "utf-16")
     params.context = { includeDeclaration = false}
-    vim.lsp.buf_request(0, "textDocument/references", params, function(err, result, ctx, _)
-        if err or not result or vim.tbl_isempty(result) then
+    vim.lsp.buf_request(0, "textDocument/references", params, function(err, references, ctx, _)
+        if err or not references or vim.tbl_isempty(references) then
             print(err)
             vim.notify("No references found", vim.log.levels.INFO)
             return
         end
-        local function flatten_symbols(symbols, result)
-            for _, symbol in ipairs(symbols) do
-                table.insert(result, symbol)
-                if symbol.children then
-                    flatten_symbols(symbol.children, result)
-                end
-            end
-        end
 
-        local flat_symbols = {}
-        flatten_symbols(result, flat_symbols)
+        local flat_references = {}
+        flatten(references, flat_references)
+        local filtered_references = filter_function_defs_from_references(flat_references)
 
-        flat_symbols = vim.tbl_filter(function(loc)
-            local filename = vim.uri_to_fname(loc.uri)
-            local lnum = loc.range.start.line 
-            local col = loc.range.start.character
-            local bufnr = vim.fn.bufnr(filename)
-            if bufnr == -1 then
-                bufnr = vim.fn.bufnr(filename, true)
-            end
-
-            if vim.fn.bufloaded(bufnr) ~= 1 then
-                vim.fn.bufload(bufnr)
-                local parser = vim.treesitter.get_parser(bufnr, "rust")
-
-                local tree = parser:parse()[1]
-                if not tree then
-                    return nil
-                end
-                vim.fn.bufload(bufnr)
-            end
-            local node = vim.treesitter.get_node({bufnr = bufnr, pos = {lnum,col} })
-            if node:parent():type() =="function_item" then
-                return false
-            else
-                return true
-            end
-        end, flat_symbols)
-
-        if #flat_symbols == 0 then
+        if #filtered_references == 0 then
+            print("No references found")
             return
         end
+
+        -- this are the columns, here only one
         local displayer = entry_display.create({
             separator = " ",
             items = {
@@ -278,11 +236,8 @@ M.custom_lsp_references = function()
         local function make_entry(loc)
             local filename = vim.uri_to_fname(loc.uri)
             filename = vim.fn.fnamemodify(filename, ":.")
-            local lnum = loc.range.start.line 
-            local col = loc.range.start.character 
-
-            --local node = vim.treesitter.get_node({bufnr = bufnr, pos = {lnum,col} })
-            --local text = vim.treesitter.get_node_text(node, bufnr)
+            local lnum = loc.range.start.line
+            local col = loc.range.start.character
 
             return {
                 value = loc,
@@ -293,8 +248,8 @@ M.custom_lsp_references = function()
                     })
                 end,
                 filename = filename,
-                lnum = lnum+1,
-                col = col+1,
+                lnum = lnum + 1,
+                col = col + 1,
             }
         end
 
@@ -304,42 +259,70 @@ M.custom_lsp_references = function()
         end
 
         pickers.new({}, {
-            prompt_title = "My LSP Implementations",
+            prompt_title = "My LSP References",
             finder = finders.new_table({
-                results = flat_symbols,
+                results = filtered_references,
                 entry_maker = make_entry,
             }),
             previewer = conf.qflist_previewer({}),
             sorter = sorter,
             layout_config = {
-                horizontal = { preview_width = 0.8},
+                horizontal = { preview_width = 0.7},
             },
         }):find()
     end)
 end
 
+local function load_buffer_and_treesitter_parse(filename)
+    local bufnr = vim.fn.bufnr(filename)
+    if bufnr == -1 then
+        bufnr = vim.fn.bufnr(filename, true)
+    end
+
+    if vim.fn.bufloaded(bufnr) ~= 1 then
+        vim.fn.bufload(bufnr)
+        local parser = vim.treesitter.get_parser(bufnr, "rust")
+        if not parser then
+            print("No parser available for language: " .. lang)
+            return nil
+        end
+
+        local tree = parser:parse()[1]
+        if not tree then
+            print("Failed to parse buffer")
+            return nil
+        end
+        vim.fn.bufload(bufnr)
+    end
+    if vim.fn.bufloaded(bufnr) ~= 1 then
+        print("still not loaded")
+    else
+        print("now loaded")
+    end
+    return bufnr
+end
 
 M.custom_lsp_implementations = function()
-    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, result, ctx, _)
-        if err or not result then
+    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
+        if err or not implementations then
             vim.notify("No implementations found", vim.log.levels.INFO)
             return
         end
 
-        local cursor_pos = vim.api.nvim_win_get_cursor(0) -- {line, col}
-        local bufnr = vim.api.nvim_get_current_buf()
-        local locations = vim.lsp.util.locations_to_items(result, bufnr)
-        --print(vim.inspect(locations))
         local current_file = vim.api.nvim_buf_get_name(0)
-        locations = vim.tbl_filter(function(loc)
+        local cursor_pos = vim.api.nvim_win_get_cursor(0)
+        local filtered_implementations = vim.tbl_filter(function(implementation)
             return not (
-                loc.filename == current_file and
-                loc.lnum == cursor_pos[1]
+                vim.uri_to_fname(implementation.targetUri) == current_file and
+                implementation.targetSelectionRange.start.line + 1 == cursor_pos[1]
             )
-        end, locations)
-        if #locations == 0 then
+        end, implementations)
+
+        if #filtered_implementations == 0 then
+            print("No other implementations found")
             return
         end
+
         local displayer = entry_display.create({
             separator = " ",
             items = {
@@ -348,49 +331,26 @@ M.custom_lsp_implementations = function()
             },
         })
 
-        local function make_entry(loc)
-            local filename = vim.fn.fnamemodify(loc.filename, ":.")
-            local text = loc.text or ""
+        local function make_entry(implementation)
+            local filename = vim.uri_to_fname(implementation.targetUri)
+            filename = vim.fn.fnamemodify(filename, ":.")
 
-            local bufnr = vim.fn.bufnr(filename)
-            if bufnr == -1 then
-                bufnr = vim.fn.bufnr(filename, true)
-            end
-
-            if vim.fn.bufloaded(bufnr) ~= 1 then
-                vim.fn.bufload(bufnr)
-                local parser = vim.treesitter.get_parser(bufnr, "rust")
-                if not parser then
-                    print("No parser available for language: " .. lang)
-                    return nil
-                end
-
-                local tree = parser:parse()[1]
-                if not tree then
-                    print("Failed to parse buffer")
-                    return nil
-                end
-                vim.fn.bufload(bufnr)
-            end
-            if vim.fn.bufloaded(bufnr) ~= 1 then
-                print("still not loaded")
-            else
-                print("now loaded")
-            end
-            local custom = get_block_info(loc.lnum, bufnr) or ""
-
+            local bufnr = load_buffer_and_treesitter_parse(filename)
+            local line_number = implementation.targetSelectionRange.start.line
+            local column = implementation.targetSelectionRange.start.character
+            local custom = get_block_info(line_number, bufnr) or ""
             return {
-                value = loc,
-                ordinal = filename .. " " .. text,
+                value = implementation,
+                ordinal = filename,
                 display = function()
                     return displayer({
                         filename,
                         {custom, "TelescopeMyHint"},
                     })
                 end,
-                filename = loc.filename,
-                lnum = loc.lnum,
-                col = loc.col,
+                filename = filename,
+                lnum = line_number + 1,
+                col = column + 1,
             }
         end
 
@@ -402,7 +362,7 @@ M.custom_lsp_implementations = function()
         pickers.new({}, {
             prompt_title = "My LSP Implementations",
             finder = finders.new_table({
-                results = locations,
+                results = filtered_implementations,
                 entry_maker = make_entry,
             }),
             previewer = conf.qflist_previewer({}),
@@ -413,8 +373,6 @@ M.custom_lsp_implementations = function()
         }):find()
     end)
 end
-
-
 
 return M
 

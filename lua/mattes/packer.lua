@@ -1,11 +1,8 @@
--- This file can be loaded by calling `lua require('plugins')` from your init.vim
-
 -- Only required if you have packer configured as `opt`
 vim.cmd [[packadd packer.nvim]]
 
 return require('packer').startup(function(use)
-    -- Packer can manage itself
-    use 'wbthomason/packer.nvim'
+    use {'wbthomason/packer.nvim'}
 
     use {
         'nvim-telescope/telescope.nvim', tag = '0.1.8',
@@ -15,24 +12,18 @@ return require('packer').startup(function(use)
 
     use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
 
-    --use({
-        --'rose-pine/neovim',
-        --as = 'rose-pine',
-        --config = function()
-            --vim.cmd('colorscheme rose-pine')
-        --end
-    --})
-    -- In your packer startup function
-    --use {"catppuccin/nvim", as = "catppuccin"}
-    --vim.cmd.colorscheme "catppuccin"
-    use { "rebelot/kanagawa.nvim", as = "kanagawa"}
+    use {"rebelot/kanagawa.nvim", as = "kanagawa"}
 
     use("mbbill/undotree")
+
     use("tpope/vim-fugitive")
 
     use('neovim/nvim-lspconfig')
 
+    -- seems to be a requirement for cmp
     use('SirVer/ultisnips')
+
+    -- completions
     use {
         "hrsh7th/nvim-cmp",
         requires = {
@@ -42,13 +33,15 @@ return require('packer').startup(function(use)
             'f3fora/cmp-spell', 'hrsh7th/cmp-emoji'
         }
     }
+
+    -- seems to be ai completions
     use {
         'tzachar/cmp-tabnine',
         run = './install.sh',
         requires = 'hrsh7th/nvim-cmp'
     }
 
-
+    -- () {} [] auto pairs
     use {
         "windwp/nvim-autopairs",
         config = function()
@@ -74,12 +67,6 @@ return require('packer').startup(function(use)
     -- is a optional requirement for diffview.
     use('nvim-tree/nvim-web-devicons')
 
-    use("ravibrock/spellwarn.nvim")
-
-    --use {
-        --"rachartier/tiny-inline-diagnostic.nvim",
-	--as = "tiny-inline-diagnostic"
-    --}
     use("nvim-treesitter/playground")
 
 end)

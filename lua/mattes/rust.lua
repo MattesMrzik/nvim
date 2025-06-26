@@ -1,7 +1,3 @@
---vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
---  vim.lsp.handlers.hover,
---  { border = "rounded" } -- You can also use "single", "double", etc.
---)
 require'lspconfig'.rust_analyzer.setup {
     cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
     settings = {
@@ -15,6 +11,8 @@ require'lspconfig'.rust_analyzer.setup {
             },
         }
     },
+    -- since the lsp takes some time to startup, calling the inlay_hint immediately has no effect
+    -- so the call is delayed
     on_attach = function(client, bufnr)
         vim.defer_fn(function()
             vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
@@ -23,6 +21,19 @@ require'lspconfig'.rust_analyzer.setup {
 }
 
 
+-- enables cargo fmt on save, i think this might be less efficient than rust fmt since 
+-- cargo does every file (i think) and not only the changed ones, but (i think) cargo fmt produces better formats
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "*.rs",
+  callback = function()
+    vim.cmd("silent !cargo fmt")
+  end,
+})
+
+-- shows deduced variable types as hint
+vim.lsp.inlay_hint.enable(true)
+
+-- code completion
 local cmp = require("cmp")
 local types = require('cmp.types')
 local compare_kinds = function(kind, reverse)
@@ -85,40 +96,14 @@ cmp.setup({
     },
 })
 
-
-vim.api.nvim_create_autocmd('LspAttach', {
-	callback = function(ev)
-		vim.schedule(function()
-			pcall(vim.keymap.del, "n", "<Esc>")
-		end)
-	end
-})
-
-vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
-vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
-vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = "*.rs",
-  callback = function()
-    vim.cmd("silent !cargo fmt")
-  end,
-})
-
-
+-- utility method used in remap.lua
 local ts_utils = require("nvim-treesitter.ts_utils")
-
-function JumpToTrait()
+local M = {}
+function M.jump_to_trait()
     local node = ts_utils.get_node_at_cursor()
     while node do
-        print("node type = " .. node:type())
         if node:type() == "impl_item" then
             for child in node:iter_children() do
-                print("child type = ", child:type())
-                local text = vim.treesitter.get_node_text(child, 0)
-                local row, col = child:range()
-                print("range = " .. row .. ", " .. col)
-                print("text =", text)
-                print("")
                 if child:type() == "type_identifier" or child:type() == "generic_type" then
                     local row, col = child:range()
                     vim.api.nvim_win_set_cursor(0, { row + 1, col + 1 })
@@ -131,6 +116,6 @@ function JumpToTrait()
     end
     print("No trait found in current impl block.")
 end
+return M
 
-vim.keymap.set("n", "<leader>gt", JumpToTrait, { desc = "Go to trait definition from impl" })
 

@@ -1,6 +1,6 @@
---vim.keymap.set("n", "<leader>ww", "<cmd>Trouble diagnostics toggle<cr>")
-vim.keymap.set("n", "<leader>ww", function()
-  -- Call the command just like you had it
+local M = {}
+
+function M.toggle_diagnostics_and_focus_its_window()
   vim.cmd("Trouble diagnostics toggle")
 
   -- Then focus the Trouble window after a short delay
@@ -14,5 +14,6 @@ vim.keymap.set("n", "<leader>ww", function()
       end
     end
   end, 50)
-end, { desc = "Trouble diagnostics toggle + focus" })
+end
 
+return M
