@@ -172,7 +172,7 @@ function M.jump_to_trait()
                         if not fn_name then
                             -- no specific function, jump to start of trait
                             vim.api.nvim_set_current_buf(bufnr)
-                            vim.api.nvim_win_set_cursor(0, { lnum, col})
+                            vim.api.nvim_win_set_cursor(0, { lnum + 1, col})
                             return
                         end
 
