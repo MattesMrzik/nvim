@@ -24,6 +24,9 @@ git clone --depth 1 https://github.com/wbthomason/packer.nvim\
 
         npm install -g neovim
 
+# python lsp
+# npm install -g pyright
+
 # inside a venv, and point nvim to that python3 bin
         pip3 install pyvim
         pip3 install neovim

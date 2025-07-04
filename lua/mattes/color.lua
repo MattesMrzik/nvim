@@ -46,57 +46,61 @@ require('kanagawa').setup({
 })
 vim.cmd("colorscheme kanagawa")
 
--- set transparent background
-vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
+local function custom_color_adjustments()
+    -- set transparent background
+    vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
 
--- spelling underlines
-vim.api.nvim_set_hl(0, "SpellBad", {
-  underline = true,
-  sp = "#b06320",
-})
-vim.api.nvim_set_hl(0, "SpellLocal", {
-  underline = true,
-  sp = "#b06320",
-})
-vim.api.nvim_set_hl(0, "SpellCap", {
-  underline = true,
-  sp = "#b06320",
-})
-vim.api.nvim_set_hl(0, "SpellRare", {
-  underline = true,
-  sp = "#b06320",
-})
+    -- spelling underlines
+    vim.api.nvim_set_hl(0, "SpellBad", {
+        underline = true,
+        sp = "#b06320",
+    })
+    vim.api.nvim_set_hl(0, "SpellLocal", {
+        underline = true,
+        sp = "#b06320",
+    })
+    vim.api.nvim_set_hl(0, "SpellCap", {
+        underline = true,
+        sp = "#b06320",
+    })
+    vim.api.nvim_set_hl(0, "SpellRare", {
+        underline = true,
+        sp = "#b06320",
+    })
 
--- telescope colors, also for custom telescope finders
-vim.api.nvim_set_hl(0, "TelescopeSymbolText",         { fg = "#f8f8f2" }) -- white
-vim.api.nvim_set_hl(0, "TelescopeSymbolMethod",       { fg = "#50fa7b" }) -- green
-vim.api.nvim_set_hl(0, "TelescopeSymbolFunction",     { fg = "#ffb86c" }) -- orange
-vim.api.nvim_set_hl(0, "TelescopeSymbolConstructor",  { fg = "#ff79c6" }) -- pink
-vim.api.nvim_set_hl(0, "TelescopeSymbolField",        { fg = "#8be9fd" }) -- cyan
-vim.api.nvim_set_hl(0, "TelescopeSymbolVariable",     { fg = "#403e0b" }) -- yellow
-vim.api.nvim_set_hl(0, "TelescopeSymbolClass",        { fg = "#8be9fd" }) -- cyan
-vim.api.nvim_set_hl(0, "TelescopeSymbolInterface",    { fg = "#bd93f9" }) -- purple
-vim.api.nvim_set_hl(0, "TelescopeSymbolModule",       { fg = "#ff79c6" }) -- pink
-vim.api.nvim_set_hl(0, "TelescopeSymbolProperty",     { fg = "#66d9ef" }) -- light blue
-vim.api.nvim_set_hl(0, "TelescopeSymbolUnit",         { fg = "#bd93f9" }) -- purple
-vim.api.nvim_set_hl(0, "TelescopeSymbolValue",        { fg = "#f1fa8c" }) -- yellow
-vim.api.nvim_set_hl(0, "TelescopeSymbolEnum",         { fg = "#ffb86c" }) -- orange
-vim.api.nvim_set_hl(0, "TelescopeSymbolKeyword",      { fg = "#ff5555" }) -- red
-vim.api.nvim_set_hl(0, "TelescopeSymbolSnippet",      { fg = "#f8f8f2" }) -- white
-vim.api.nvim_set_hl(0, "TelescopeSymbolColor",        { fg = "#fab387" }) -- peach
-vim.api.nvim_set_hl(0, "TelescopeSymbolFile",         { fg = "#f8f8f2" }) -- white
-vim.api.nvim_set_hl(0, "TelescopeSymbolReference",    { fg = "#ffb86c" }) -- orange
-vim.api.nvim_set_hl(0, "TelescopeSymbolFolder",       { fg = "#94e2d5" }) -- teal
-vim.api.nvim_set_hl(0, "TelescopeSymbolEnumMember",   { fg = "#bd93f9" }) -- purple
-vim.api.nvim_set_hl(0, "TelescopeSymbolConstant",     { fg = "#f38ba8" }) -- light red
-vim.api.nvim_set_hl(0, "TelescopeSymbolStruct",       { fg = "#fab387" }) -- peach
-vim.api.nvim_set_hl(0, "TelescopeSymbolEvent",        { fg = "#f38ba8" }) -- light red
-vim.api.nvim_set_hl(0, "TelescopeSymbolOperator",     { fg = "#ff5555" }) -- red
-vim.api.nvim_set_hl(0, "TelescopeSymbolTypeParameter",{ fg = "#b4befe" }) -- lavender
-vim.api.nvim_set_hl(0, "TelescopeSymbolObject",       { fg = "#b4bffe" }) -- lavender
+    -- telescope colors, also for custom telescope finders
+    vim.api.nvim_set_hl(0, "TelescopeSymbolText",         { fg = "#f8f8f2" }) -- white
+    vim.api.nvim_set_hl(0, "TelescopeSymbolMethod",       { fg = "#50fa7b" }) -- green
+    vim.api.nvim_set_hl(0, "TelescopeSymbolFunction",     { fg = "#ffb86c" }) -- orange
+    vim.api.nvim_set_hl(0, "TelescopeSymbolConstructor",  { fg = "#ff79c6" }) -- pink
+    vim.api.nvim_set_hl(0, "TelescopeSymbolField",        { fg = "#8be9fd" }) -- cyan
+    vim.api.nvim_set_hl(0, "TelescopeSymbolVariable",     { fg = "#403e0b" }) -- yellow
+    vim.api.nvim_set_hl(0, "TelescopeSymbolClass",        { fg = "#8be9fd" }) -- cyan
+    vim.api.nvim_set_hl(0, "TelescopeSymbolInterface",    { fg = "#bd93f9" }) -- purple
+    vim.api.nvim_set_hl(0, "TelescopeSymbolModule",       { fg = "#ff79c6" }) -- pink
+    vim.api.nvim_set_hl(0, "TelescopeSymbolProperty",     { fg = "#66d9ef" }) -- light blue
+    vim.api.nvim_set_hl(0, "TelescopeSymbolUnit",         { fg = "#bd93f9" }) -- purple
+    vim.api.nvim_set_hl(0, "TelescopeSymbolValue",        { fg = "#f1fa8c" }) -- yellow
+    vim.api.nvim_set_hl(0, "TelescopeSymbolEnum",         { fg = "#ffb86c" }) -- orange
+    vim.api.nvim_set_hl(0, "TelescopeSymbolKeyword",      { fg = "#ff5555" }) -- red
+    vim.api.nvim_set_hl(0, "TelescopeSymbolSnippet",      { fg = "#f8f8f2" }) -- white
+    vim.api.nvim_set_hl(0, "TelescopeSymbolColor",        { fg = "#fab387" }) -- peach
+    vim.api.nvim_set_hl(0, "TelescopeSymbolFile",         { fg = "#f8f8f2" }) -- white
+    vim.api.nvim_set_hl(0, "TelescopeSymbolReference",    { fg = "#ffb86c" }) -- orange
+    vim.api.nvim_set_hl(0, "TelescopeSymbolFolder",       { fg = "#94e2d5" }) -- teal
+    vim.api.nvim_set_hl(0, "TelescopeSymbolEnumMember",   { fg = "#bd93f9" }) -- purple
+    vim.api.nvim_set_hl(0, "TelescopeSymbolConstant",     { fg = "#f38ba8" }) -- light red
+    vim.api.nvim_set_hl(0, "TelescopeSymbolStruct",       { fg = "#fab387" }) -- peach
+    vim.api.nvim_set_hl(0, "TelescopeSymbolEvent",        { fg = "#f38ba8" }) -- light red
+    vim.api.nvim_set_hl(0, "TelescopeSymbolOperator",     { fg = "#ff5555" }) -- red
+    vim.api.nvim_set_hl(0, "TelescopeSymbolTypeParameter",{ fg = "#b4befe" }) -- lavender
+    vim.api.nvim_set_hl(0, "TelescopeSymbolObject",       { fg = "#b4bffe" }) -- lavender
 
-vim.api.nvim_set_hl(0, "TelescopeMyHint", {fg = "#434544"})
-vim.api.nvim_set_hl(0, "TelescopeAutoSearch", {fg = "#DBB0AF"})
+    vim.api.nvim_set_hl(0, "TelescopeMyHint", {fg = "#434544"})
+    vim.api.nvim_set_hl(0, "TelescopeAutoSearch", {fg = "#DBB0AF"})
+end
+
+custom_color_adjustments()
 
 -- utility function
 local M = {}
@@ -111,7 +115,7 @@ function M.my_toggle_theme()
         vim.notify("Switching to theme kanagawa-dragon")
         require("kanagawa").setup({ theme = "dragon" })
         vim.cmd("colorscheme kanagawa")
-	vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
+        custom_color_adjustments()
         current = 0
    end
 end

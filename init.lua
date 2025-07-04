@@ -20,6 +20,23 @@ vim.g._ts_force_sync_parsing = true
 -- lsp
 -- rust lsp in in separate rust.lua file
 require'lspconfig'.lua_ls.setup{}
+-- python lsp
+require"lspconfig".pyright.setup({
+    on_attach = function(client, bufnr)
+        -- Optional: keybindings, formatting settings etc.
+        local opts = { noremap=true, silent=true, buffer=bufnr }
+    end,
+    settings = {
+        python = {
+            analysis = {
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+                diagnosticMode = "openFilesOnly", -- or "workspace"
+                typeCheckingMode = "basic", -- or "strict"
+            }
+        }
+    }
+})
 -- disable lsp references on esc press
 vim.api.nvim_create_autocmd("LspAttach", {
   once = true,
@@ -27,4 +44,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
     pcall(vim.keymap.del, "n", "<Esc>")
   end,
 })
-

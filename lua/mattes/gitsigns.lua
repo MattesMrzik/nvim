@@ -111,7 +111,7 @@ local function myf(file, line, debug)
 end
 
 
-vim.keymap.set('n', '<leader>kk', function()
+vim.keymap.set('n', '<leader>zz', function()
     myf("lua/mattes/gitsigns.lua", 70)
 end, { desc = "Stage hunk at line 70 in gitsigns.lua" })
 

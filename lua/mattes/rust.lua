@@ -9,6 +9,13 @@ require'lspconfig'.rust_analyzer.setup {
             diagnostics = {
                 enable = true;
             },
+            workspace = {
+                symbol = {
+                    search = {
+                        limit = 10000,
+                    },
+                },
+            },
         }
     },
     -- since the lsp takes some time to startup, calling the inlay_hint immediately has no effect

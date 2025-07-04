@@ -26,9 +26,13 @@ vim.keymap.set("n", "<leader>gt", require("mattes.rust").jump_to_trait, { desc =
 vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
 vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
+vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 
 -- cmp
 -- see rust.lua
+
+-- gitsigns
+-- see gitsigns.lua
 
 -- diagnostics
 vim.keymap.set("n", "<leader>d", require("mattes.diagnostics").toggle_diagnostics, { desc = "Toggles diagnostics"} )
@@ -50,7 +54,6 @@ vim.keymap.set("n", "<leader>ss", function()
     require("telescope.builtin").lsp_document_symbols()
   end
 end, { desc = "Search symbols in current file" })
-
 vim.keymap.set("n", "<leader>im", function()
     local fname = vim.api.nvim_buf_get_name(0)
     if fname:sub(-3) == ".rs" then
@@ -59,9 +62,9 @@ vim.keymap.set("n", "<leader>im", function()
         require("telescope.builtin").lsp_implementations()
     end
 end, {desc = "Search implementations"})
-
 --vim.keymap.set('n', '<C-[>', '<cmd>Telescope lsp_references<CR>', { desc = "Search symbols in current file" })
-vim.keymap.set("n", "<C-[>", function()
+--vim.keymap.set("n", "<C-[>", function()
+vim.keymap.set("n", "<leader>k", function()
     local fname = vim.api.nvim_buf_get_name(0)
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_references()
@@ -70,6 +73,7 @@ vim.keymap.set("n", "<C-[>", function()
     end
 end, {desc = "Search references"})
 
+
 -- DiffView
 vim.keymap.set("n", "<leader>jj", require("mattes.diffview").toggle_diff_view, { desc = "Toggles diffview"})
-vim.keymap.set("n", "<leader>k", require("mattes.diffview").jump_between_right_file_and_file_over_view_pane, { desc = "Jump between overview and right pane"})
+vim.keymap.set("n", "<leader>m", require("mattes.diffview").jump_between_right_file_and_file_over_view_pane, { desc = "Jump between overview and right pane"})

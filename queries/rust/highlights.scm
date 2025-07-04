@@ -1,3 +1,6 @@
+; mattes: This is to set the @spell to code tree-sitter nodes such that the code is spell checked,
+; but at the same time the highlights aren't overwritten
+ 
 ; Forked from https://github.com/tree-sitter/tree-sitter-rust
 ; Copyright (c) 2017 Maxim Sokolov
 ; Licensed under the MIT license.
