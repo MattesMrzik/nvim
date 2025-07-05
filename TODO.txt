@@ -17,11 +17,18 @@
 # after renaming a var, call save all buffers
 # make selection in popup stand out more
 
+# GREP leader>fs
+    - make columns
+    - highligh hit in one color, additionaly typing in another color
+    - donst search the filename
+    - leader gr for grep with regrex
+    - is only one hit that goto it
+# Custom telescope
+    - references shows multiple entries if there are multiple refs on the same line, but since in the preview it highlights the whole line this is not useful. I could either change the highligh to only higligh the word, or filter dublicate lines
 # blue screen of death
-# leader d (on long message) froze (disableing it)
+ - leader d (on long message) froze (disableing it)
 
 # look at what fugitive does, can it also stage unstage stuff in some vizual mode
-# leader gr for grep with regrex
 # header to show me which impl or struct i am in, also add this to the preview of telescope
 
 # telescope not only fzy for finding but if all the same fzy score (not locking at length or sth liek this ) can u use sth like most recently used?
@@ -56,7 +63,6 @@
             return
         end
 
-# if >fs is only one hit that goto it
 
 # unstage in diffview
 # gf in diffview jumps to wrong lines if called on partly staged files

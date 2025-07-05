@@ -105,6 +105,18 @@ local function get_block_info(line, bufnr)
     end
 end
 
+local function dynamic_layout_config()
+  local cursor_line = vim.fn.winline()
+  local total_lines = vim.api.nvim_win_get_height(0)
+  local is_bottom = cursor_line > total_lines / 2
+  return {
+    height = 0.47,
+    width = 0.8,
+    --prompt_position = "top",
+    anchor = is_bottom and "N" or "S",
+  }
+end
+
 M.custom_lsp_document_symbols = function()
     vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, ctx, _)
         if err or not symbols then return end
@@ -154,6 +166,11 @@ M.custom_lsp_document_symbols = function()
         sorter.highlighter = function (a,b,c)
             return fzy.positions(b,c:sub(0,36))
         end
+        local cursor_line = vim.fn.winline()
+        local total_lines = vim.api.nvim_win_get_height(0)
+        local is_bottom = cursor_line > total_lines / 2
+        local style = dynamic_layout_config()
+
         pickers.new({}, {
             prompt_title = "My Document Symbols",
             finder = finders.new_table({
@@ -165,6 +182,9 @@ M.custom_lsp_document_symbols = function()
             layout_config = {
                 horizontal = {
                     preview_width = 0.4, -- percent of total width; default is 0.5
+                    height = style.height,
+                    width = style.width,
+                    anchor = style.anchor,
                 },
             },
         }):find()
@@ -253,7 +273,7 @@ M.custom_lsp_references = function()
         sorter.highlighter = function(_, line, prompt)
             return fzy.positions(line, prompt)
         end
-
+        local style = dynamic_layout_config()
         pickers.new({}, {
             prompt_title = "My LSP References",
             finder = finders.new_table({
@@ -264,6 +284,9 @@ M.custom_lsp_references = function()
             sorter = sorter,
             layout_config = {
                 horizontal = { preview_width = 0.7},
+                height = style.height,
+                width = style.width,
+                anchor = style.anchor,
             },
         }):find()
     end)
@@ -350,6 +373,8 @@ M.custom_lsp_implementations = function()
             return fzy.positions(line, prompt)
         end
 
+        local style = dynamic_layout_config()
+
         pickers.new({}, {
             prompt_title = "My LSP Implementations",
             finder = finders.new_table({
@@ -360,10 +385,100 @@ M.custom_lsp_implementations = function()
             sorter = sorter,
             layout_config = {
                 horizontal = { preview_width = 0.4 },
+                height = style.height,
+                width = style.width,
+                anchor = style.anchor,
             },
         }):find()
     end)
 end
 
-return M
+M.custom_workspace_symbols = function()
+    vim.lsp.buf_request(0, "workspace/symbol", {query = ""}, function(err, symbols, ctx, _)
+        if err then
+            print("LSP error:", vim.inspect(err))
+            return
+        end
+        if not symbols or vim.tbl_isempty(symbols) then
+            print("No symbols found")
+            return
+        end
+        local flat_symbols= {}
+        flatten(symbols, flat_symbols)
+        local first_col_width = 40
+        local second_col_width = 30
 
+        -- this are the columns, here only one
+        local displayer = entry_display.create({
+            separator = " ",
+            items = {
+                {width = first_col_width},
+                {width = second_col_width},
+                { remaining = true },
+            },
+        })
+
+        local function make_entry(symbol)
+            local filename = vim.uri_to_fname(symbol.location.uri)
+            filename = vim.fn.fnamemodify(filename, ":.")
+            local lnum = symbol.location.range.start.line
+            local col = symbol.location.range.start.character
+            local name = symbol.name
+            local kind = vim.lsp.protocol.SymbolKind[symbol.kind]
+            if kind == "Interface" or kind == "Object" then
+                kind = "Trait"
+            end
+
+            local hl = kind_highlights[kind] or ""
+
+            return {
+                value = symbol,
+                ordinal = name .. " " .. kind,
+                display = function()
+                    return displayer({
+                        filename,
+                        name,
+                        {kind, hl},
+                    })
+                end,
+                filename = filename,
+                lnum = lnum + 1,
+                col = col + 1,
+            }
+        end
+
+        local sorter = conf.generic_sorter({})
+        sorter.highlighter = function (a,b,c)
+            local positions = fzy.positions(b, c:sub(first_col_width, first_col_width + second_col_width))
+            for i, pos in ipairs(positions) do
+                positions[i] = pos + first_col_width - 1
+            end
+            return positions
+        end
+        local style = dynamic_layout_config()
+        pickers.new({}, {
+            prompt_title = "My LSP Workspace symbols",
+            finder = finders.new_table({
+                results = flat_symbols,
+                entry_maker = make_entry,
+            }),
+            previewer = conf.qflist_previewer({}),
+            sorter = sorter,
+            layout_config = {
+                horizontal = { preview_width = 0.6},
+                height = style.height,
+                width = style.width,
+                anchor = style.anchor,
+            },
+        }):find()
+
+    end)
+end
+
+M.dynamic_picker = function(picker_fn, opts)
+  opts = opts or {}
+  opts.layout_config = dynamic_layout_config()
+  picker_fn(opts)
+end
+
+return M

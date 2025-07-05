@@ -11,6 +11,7 @@ vim.o.expandtab = true
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.o.signcolumn = "yes:2"
+vim.opt.statusline = "%f %m %r %{FugitiveHead() !=# '' ? ', on branch: ' . FugitiveHead() : ''} %= %y %l:%c"
 
 -- advanced settings
 

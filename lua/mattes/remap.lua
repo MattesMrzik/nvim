@@ -40,11 +40,11 @@ vim.keymap.set("n", "<leader>nd", require("mattes.diagnostics").disable_diagnost
 
 -- telescope
 local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
-vim.keymap.set('n', '<leader>fg', builtin.git_files, { desc = 'Telescope find files' })
-vim.keymap.set("n", "<leader>ws", require("telescope.builtin").lsp_workspace_symbols, { desc = "Workspace Symbols" })
-vim.keymap.set('n', '<leader>fs', function() builtin.grep_string({ search = vim.fn.input("Grep > ") }); end)
 local cs = require("mattes.custom_telescope_functions")
+vim.keymap.set('n', '<leader>ff', function() cs.dynamic_picker(builtin.find_files)end, { desc = 'Telescope find files' })
+vim.keymap.set('n', '<leader>fg', builtin.git_files, { desc = 'Telescope find files' })
+-- vim.keymap.set("n", "<leader>ws", require("telescope.builtin").lsp_workspace_symbols, { desc = "Workspace Symbols" })
+vim.keymap.set('n', '<leader>fs', function() builtin.grep_string({ search = vim.fn.input("Grep > ") }); end)
 vim.keymap.set("n", "<leader>ss", function()
   local fname = vim.api.nvim_buf_get_name(0)
   --vim.cmd("write")
@@ -72,8 +72,9 @@ vim.keymap.set("n", "<leader>k", function()
         require("telescope.builtin").lsp_references()
     end
 end, {desc = "Search references"})
-
+vim.keymap.set("n", "<leader>ws", function() cs.custom_workspace_symbols() end, {desc =  "custom Workspace symbols"})
 
 -- DiffView
 vim.keymap.set("n", "<leader>jj", require("mattes.diffview").toggle_diff_view, { desc = "Toggles diffview"})
 vim.keymap.set("n", "<leader>m", require("mattes.diffview").jump_between_right_file_and_file_over_view_pane, { desc = "Jump between overview and right pane"})
+vim.keymap.set("n", "<leader>fh", function() vim.cmd("DiffviewFileHistory %")end, {desc = "Shows the git file history"})

@@ -46,11 +46,11 @@ require('kanagawa').setup({
 })
 vim.cmd("colorscheme kanagawa")
 
-local function custom_color_adjustments()
-    -- set transparent background
+local function transparent_background()
     vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
+end
 
-    -- spelling underlines
+local function spelling_underline()
     vim.api.nvim_set_hl(0, "SpellBad", {
         underline = true,
         sp = "#b06320",
@@ -67,8 +67,9 @@ local function custom_color_adjustments()
         underline = true,
         sp = "#b06320",
     })
+end
 
-    -- telescope colors, also for custom telescope finders
+local function telescope_colors()
     vim.api.nvim_set_hl(0, "TelescopeSymbolText",         { fg = "#f8f8f2" }) -- white
     vim.api.nvim_set_hl(0, "TelescopeSymbolMethod",       { fg = "#50fa7b" }) -- green
     vim.api.nvim_set_hl(0, "TelescopeSymbolFunction",     { fg = "#ffb86c" }) -- orange
@@ -100,7 +101,9 @@ local function custom_color_adjustments()
     vim.api.nvim_set_hl(0, "TelescopeAutoSearch", {fg = "#DBB0AF"})
 end
 
-custom_color_adjustments()
+transparent_background()
+spelling_underline()
+telescope_colors()
 
 -- utility function
 local M = {}
@@ -110,12 +113,16 @@ function M.my_toggle_theme()
     if current == 0 then
         vim.notify("Switching to theme kanagawa-lotus")
         vim.cmd("colorscheme kanagawa-lotus")
+        telescope_colors()
+        spelling_underline()
         current = 1
     else
         vim.notify("Switching to theme kanagawa-dragon")
         require("kanagawa").setup({ theme = "dragon" })
         vim.cmd("colorscheme kanagawa")
-        custom_color_adjustments()
+        telescope_colors()
+        spelling_underline()
+        transparent_background()
         current = 0
    end
 end
