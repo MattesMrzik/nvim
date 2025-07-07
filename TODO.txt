@@ -25,8 +25,12 @@
     - is only one hit that goto it
 # Custom telescope
     - references shows multiple entries if there are multiple refs on the same line, but since in the preview it highlights the whole line this is not useful. I could either change the highligh to only higligh the word, or filter dublicate lines
+    - if show refs make title of prompt say the refs, same for impl, saying the name of the trait when on impl of trait and also when on impl of trait fn
 # blue screen of death
  - leader d (on long message) froze (disableing it)
+
+# colors
+    - trait and typeparameter seem to have the same color in telescope
 
 # look at what fugitive does, can it also stage unstage stuff in some vizual mode
 # header to show me which impl or struct i am in, also add this to the preview of telescope

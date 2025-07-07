@@ -105,16 +105,16 @@ local function get_block_info(line, bufnr)
     end
 end
 
-local function dynamic_layout_config()
-  local cursor_line = vim.fn.winline()
-  local total_lines = vim.api.nvim_win_get_height(0)
-  local is_bottom = cursor_line > total_lines / 2
-  return {
-    height = 0.47,
-    width = 0.8,
-    --prompt_position = "top",
-    anchor = is_bottom and "N" or "S",
-  }
+M.dynamic_layout_config = function()
+    local cursor_line = vim.fn.winline()
+    local total_lines = vim.api.nvim_win_get_height(0)
+    local is_bottom = cursor_line > total_lines / 2
+    return {
+        height = 0.47,
+        width = 0.8,
+        --prompt_position = "top",
+        anchor = is_bottom and "N" or "S",
+    }
 end
 
 M.custom_lsp_document_symbols = function()
@@ -169,10 +169,12 @@ M.custom_lsp_document_symbols = function()
         local cursor_line = vim.fn.winline()
         local total_lines = vim.api.nvim_win_get_height(0)
         local is_bottom = cursor_line > total_lines / 2
-        local style = dynamic_layout_config()
+        local style = M.dynamic_layout_config()
 
         pickers.new({}, {
             prompt_title = "My Document Symbols",
+            preview_title = "",
+            results_title = "",
             finder = finders.new_table({
                 results = flat_symbols,
                 entry_maker = make_entry,
@@ -273,9 +275,12 @@ M.custom_lsp_references = function()
         sorter.highlighter = function(_, line, prompt)
             return fzy.positions(line, prompt)
         end
-        local style = dynamic_layout_config()
+        local style = M.dynamic_layout_config()
         pickers.new({}, {
             prompt_title = "My LSP References",
+            preview_title = "",
+            results_title = "",
+
             finder = finders.new_table({
                 results = filtered_references,
                 entry_maker = make_entry,
@@ -373,10 +378,13 @@ M.custom_lsp_implementations = function()
             return fzy.positions(line, prompt)
         end
 
-        local style = dynamic_layout_config()
+        local style = M.dynamic_layout_config()
 
         pickers.new({}, {
             prompt_title = "My LSP Implementations",
+            preview_title = "",
+            results_title = "",
+
             finder = finders.new_table({
                 results = filtered_implementations,
                 entry_maker = make_entry,
@@ -455,9 +463,12 @@ M.custom_workspace_symbols = function()
             end
             return positions
         end
-        local style = dynamic_layout_config()
+        local style = M.dynamic_layout_config()
         pickers.new({}, {
             prompt_title = "My LSP Workspace symbols",
+            preview_title = "",
+            results_title = "",
+
             finder = finders.new_table({
                 results = flat_symbols,
                 entry_maker = make_entry,
@@ -477,7 +488,9 @@ end
 
 M.dynamic_picker = function(picker_fn, opts)
   opts = opts or {}
-  opts.layout_config = dynamic_layout_config()
+  opts.layout_config = M.dynamic_layout_config()
+  opts.results_title = ""
+  opts.preview_title = ""
   picker_fn(opts)
 end
 
