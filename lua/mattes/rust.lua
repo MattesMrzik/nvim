@@ -132,9 +132,14 @@ function M.jump_to_trait()
             for child in node:iter_children() do
                 if child:type() == "type_identifier" or child:type() == "generic_type" then
                     local row, col = child:range()
-                    vim.api.nvim_win_set_cursor(0, { row + 1, col + 1 })
+                    --vim.api.nvim_win_set_cursor(0, { row + 1, col + 1 })
 
                     local params = vim.lsp.util.make_position_params(nil, "utf-16")
+                    params.position = {
+                        line = row,
+                        character = col,
+                    }
+
                     vim.lsp.buf_request(0, "textDocument/definition", params, function(_, result)
                         if not result or vim.tbl_isempty(result) then
                             print("No trait found.")
