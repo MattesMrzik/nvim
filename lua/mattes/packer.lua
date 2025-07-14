@@ -69,4 +69,18 @@ return require('packer').startup(function(use)
 
     use("nvim-treesitter/playground")
 
+    use {
+        "CopilotC-Nvim/CopilotChat.nvim",
+        requires = {
+            { "github/copilot.vim" }, -- or 'zbirenbaum/copilot.lua'
+            { "nvim-lua/plenary.nvim", branch = "master" },
+        },
+        config = function()
+            require("CopilotChat").setup({
+                copilot_model = "gpt-4o-copilot",
+            })
+        end
+    }
+
+    use {'nvim-telescope/telescope-ui-select.nvim' }
 end)

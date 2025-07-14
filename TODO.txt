@@ -2,20 +2,25 @@
 # if search symbold and type method or funtion then sort by line number
 # maybe make arrow keys select item from the completion list
 
-# scroll view
 # multiple cursors
-# expand and shrink selection wiht tree sitter
-# goto struct 
 # telesope associanted symbols, for example if i am in the body of a struct / impl block then show associated methods, perhaps with leaser as (associated symbols)
-# jump to definition of one of the parameters passed to a ctor 
 # vi( if the next pair () dosnt contain any chars
 # cmp remove case sensitivityy, since when i start typing wiht start being capital it seems to be case sensitive
-# make >im search for nodes up in treesitter until a function or a trait def is found and then jump to these implementations
 # make >jj disable inlay hints for that buffer
-# workspace symbols misses tree struct, why
-# make >im go to implementation if in def of trait and go to def of trait if in implementation
 # after renaming a var, call save all buffers
-# make selection in popup stand out more
+
+# movement and selection 
+    - jump to next fn or impl or struct def
+    + jump to trait puts cursor on impl block and then calls goto definition. when i then press c-o i go back to that impl block and not the position where i pressed >gt: Solved by passing params to the lspcall
+    - expand and shrink selection wiht tree sitter
+    - goto struct, or is this already achived by >gt? or do i want to have a separate keybinding for this
+    - (quite the edge case) jump to definition of one of the parameters passed to a ctor 
+    - make >im search for nodes up in treesitter until a function or a trait def is found and then jump to these implementations
+
+# AI
+    + https://github.com/CopilotC-Nvim/CopilotChat.nvim
+    - bindings for accepting diff and much more: github.com/jellydn/lazy-nvim-ide/blob/main/lua/plugins/extras/copilot-chat-v2.lua
+
 
 # GREP leader>fs
     - make columns
@@ -31,6 +36,7 @@
 
 # colors
     - trait and typeparameter seem to have the same color in telescope
+    - make selection in popup stand out more
 
 # look at what fugitive does, can it also stage unstage stuff in some vizual mode
 # header to show me which impl or struct i am in, also add this to the preview of telescope

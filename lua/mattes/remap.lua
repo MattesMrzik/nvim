@@ -7,6 +7,12 @@ vim.keymap.set("n", "<leader>e", vim.cmd.Ex)
 vim.keymap.set("v", "cc", '"+y')
 vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<leader>th", require("mattes.color").my_toggle_theme, {desc = "Toggle theme"})
+vim.keymap.set("n", "<C-j>", "<C-e>", { noremap = true, desc = "Scroll view down" })
+vim.keymap.set("n", "<C-k>", "<C-y>", { noremap = true, desc = "Scroll view up" })
+
+-- copilot
+vim.keymap.set("n", "<leader>cp", function() require("CopilotChat").toggle() end, { desc = "Toggle Copilot Chat" })
+
 
 -- diagnostics
 vim.keymap.set('n', ']d', function() vim.diagnostic.goto_next({ float = false }) end)
