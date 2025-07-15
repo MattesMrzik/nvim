@@ -46,6 +46,8 @@ require('kanagawa').setup({
 })
 vim.cmd("colorscheme kanagawa")
 
+vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "Grey" })
+
 local function transparent_background()
     vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
 end
