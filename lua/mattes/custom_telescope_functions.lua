@@ -76,7 +76,7 @@ local function flatten(symbols, result)
 end
 
 local function get_block_info(line, bufnr)
-    local node = vim.treesitter.get_node({bufnr = bufnr, pos = {line-1,0} })
+    local node = vim.treesitter.get_node({bufnr = bufnr, pos = {line,0} })
     local while_count = 0
     local patterns = {
         "^(impl.*)",
@@ -90,12 +90,12 @@ local function get_block_info(line, bufnr)
         end
         local start_row, start_col, end_row, end_col = vim.treesitter.get_node_range(node)
         local lines = vim.api.nvim_buf_get_lines(bufnr, start_row-1, start_row + 10, false)
-        for i, line in pairs(lines) do
+        for i, l in pairs(lines) do
             if i > 10 then
                 break
             end
             for _, pat in pairs(patterns) do
-                local m = line:match(pat)
+                local m = l:match(pat)
                 if m ~= nil then
                     return m
                 end
