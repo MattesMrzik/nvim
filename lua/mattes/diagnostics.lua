@@ -4,6 +4,9 @@ vim.diagnostic.config({
 })
 -- helper to wrap the diagnostics text that is used in virtual_lines if the window width is too small
 local function wrap_diagnostic(msg, max_width)
+    if max_width <= 0 then
+        return "max_width is zero, so no wrappin" .. msg
+    end
     local lines = {}
     for s in msg:gmatch("[^\r\n]+") do
         table.insert(lines, s)
@@ -39,11 +42,11 @@ local function get_min_win_size(bufnr)
 end
 
 -- the lsp inlay hints further push the diagnostics to the right and we need to take this into account
-local function get_inlay_width(bufnr, line)
+local function get_inlay_width(bufnr, line, col)
     local inlay_ns = vim.api.nvim_get_namespaces()["nvim.lsp.inlayhint"]
     if not inlay_ns then return 0 end
 
-    local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, inlay_ns, {line, 0}, {line, -1}, {details = true})
+    local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, inlay_ns, {line, 0}, {line, col}, {details = true})
     local total_width = 0
     for _, mark in ipairs(extmarks) do
         local virt_text = mark[4] and mark[4].virt_text
@@ -54,8 +57,7 @@ local function get_inlay_width(bufnr, line)
             end
         end
     end
-    -- the plus 2 come from the preceding and trailing space before and after the inlay hint (i think) 
-    return total_width + 2
+    return total_width +2
 end
 
 
@@ -104,9 +106,10 @@ function M.toggle_diagnostics()
                 severity = nil,
                 format = function(diagnostic)
                     local min_size = get_min_win_size(diagnostic.bufnr)
-                    local inlayhint = get_inlay_width(diagnostic.bufnr, diagnostic.lnum)
+                    local inlayhint = get_inlay_width(diagnostic.bufnr, diagnostic.lnum, diagnostic.col)
                     local remaining_width = min_size - diagnostic.col - inlayhint
                     return wrap_diagnostic(diagnostic.message, remaining_width)
+                    --return wrap_diagnostic( "min " .. min_size .. " " .. inlayhint .. " " .. diagnostic.message, 10)
                 end,
             }
         })

@@ -21,7 +21,8 @@
     + https://github.com/CopilotC-Nvim/CopilotChat.nvim
     - bindings for accepting diff and much more: github.com/jellydn/lazy-nvim-ide/blob/main/lua/plugins/extras/copilot-chat-v2.lua
 
-
+# diagonstics
+    make write on a file update diagnostics for every buffer
 # GREP leader>fs
     - make columns
     - highligh hit in one color, additionaly typing in another color

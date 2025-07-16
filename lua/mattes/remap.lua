@@ -9,10 +9,25 @@ vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<leader>th", require("mattes.color").my_toggle_theme, {desc = "Toggle theme"})
 vim.keymap.set("n", "<C-j>", "<C-e>", { noremap = true, desc = "Scroll view down" })
 vim.keymap.set("n", "<C-k>", "<C-y>", { noremap = true, desc = "Scroll view up" })
+vim.keymap.set("n", "*", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true }) -- highlight without jumping
+vim.keymap.set("n", "#", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true })
+
 
 -- copilot
 vim.keymap.set("n", "<leader>cp", function() require("CopilotChat").toggle() end, { desc = "Toggle Copilot Chat" })
+vim.keymap.set('i', '<C-L>', '<Plug>(copilot-accept-word)')
+local copilot_enabled = true
 
+vim.keymap.set("n", "<leader>ct", function()
+  if copilot_enabled then
+    vim.cmd("Copilot disable")
+    vim.notify("Copilot disabled", vim.log.levels.INFO)
+  else
+    vim.cmd("Copilot enable")
+    vim.notify("Copilot enabled", vim.log.levels.INFO)
+  end
+  copilot_enabled = not copilot_enabled
+end, { desc = "Toggle Copilot", silent = true })
 
 -- diagnostics
 vim.keymap.set('n', ']d', function() vim.diagnostic.goto_next({ float = false }) end)

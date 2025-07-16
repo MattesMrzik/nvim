@@ -43,4 +43,5 @@ require'nvim-treesitter.configs'.setup {
 require("treesitter-context").setup({
     multiline_threshold = 1,
     trim_scope = 'inner',
+    multiwindow = true,
 })

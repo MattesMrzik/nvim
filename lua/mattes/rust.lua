@@ -55,7 +55,25 @@ local compare_kinds = function(kind, reverse)
         return nil
     end
 end
+
+local modify_text_edit = function(entry, ctx)
+    local item = entry:get_completion_item()
+    if item.textEdit and item.textEdit.range then
+        local range = item.textEdit.range
+        local on_same_line = range.start.line == range["end"].line
+        if on_same_line then
+            item.textEdit.range["end"].character = item.textEdit.range.start.character
+            entry.completion_item = item
+        end
+    end
+    return true
+end
+
 cmp.setup({
+    window = {
+        completion = require('cmp').config.window.bordered(),
+        documentation = require('cmp').config.window.bordered(),
+    },
     preselect = cmp.PreselectMode.None,
     completion = {
         completeopt = 'menu,menuone,preview',
@@ -72,7 +90,7 @@ cmp.setup({
         ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
     },
     sources =  {
-        { name = 'nvim_lsp' },
+        { name = 'nvim_lsp', entry_filter = modify_text_edit},
         { name = 'vsnip' },
         { name = 'path' },
         { name = 'buffer' },
@@ -102,6 +120,32 @@ cmp.setup({
         },
     },
 })
+
+--cmp.event:on('confirm_done', function(event)
+    --print("Confirm done event triggered")
+    --local entry = event.entry
+    --local item = entry:get_completion_item()
+    --if item.textEdit and item.textEdit.range then
+        --print("TextEdit range found, processing...")
+        --print(vim.inspect(item.textEdit))
+        --local range = item.textEdit.range
+        ---- Only patch if the range is on a single line and removes at most one word
+        --if range.start.line == range["end"].line then
+        --local bufnr = vim.api.nvim_get_current_buf()
+        --local line_text = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)[1] or ""
+        --local removed_text = line_text:sub(range.start.character + 1 - #item.textEdit.newText, range["end"].character - #item.textEdit.newText + 1)
+        --print("Removed text: " .. removed_text)
+        ---- Check if the removed text is a single word (no whitespace)
+        ----if removed_text:match("^%w+$") then
+            --print("Single word removed, patching textEdit range...")
+            ---- Patch the end column to match the start column (insert only, don't replace)
+            --item.textEdit.range["end"].character = item.textEdit.range.start.character
+            --entry.completion_item = item
+        ----end
+    --end
+--end
+--end)
+
 
 -- utility method used in remap.lua
 local ts_utils = require("nvim-treesitter.ts_utils")

@@ -46,10 +46,12 @@ require('kanagawa').setup({
 })
 vim.cmd("colorscheme kanagawa")
 
-vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "Grey" })
-
 local function transparent_background()
     vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
+    vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "Grey" })
+    vim.api.nvim_set_hl(0, "TreesitterContext", { bg = NONE})
+    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = "#000000" })
 end
 
 local function spelling_underline()
@@ -103,9 +105,14 @@ local function telescope_colors()
     vim.api.nvim_set_hl(0, "TelescopeAutoSearch", {fg = "#DBB0AF"})
 end
 
+local function set_copilot_suggestion_color()
+    vim.cmd([[highlight! link CopilotSuggestion String]])
+end
+
 transparent_background()
 spelling_underline()
 telescope_colors()
+set_copilot_suggestion_color()
 
 -- utility function
 local M = {}
@@ -117,6 +124,7 @@ function M.my_toggle_theme()
         vim.cmd("colorscheme kanagawa-lotus")
         telescope_colors()
         spelling_underline()
+        set_copilot_suggestion_color()
         current = 1
     else
         vim.notify("Switching to theme kanagawa-dragon")
@@ -125,6 +133,7 @@ function M.my_toggle_theme()
         telescope_colors()
         spelling_underline()
         transparent_background()
+        set_copilot_suggestion_color()
         current = 0
    end
 end

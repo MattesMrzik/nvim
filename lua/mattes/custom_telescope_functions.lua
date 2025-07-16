@@ -288,7 +288,7 @@ M.custom_lsp_references = function()
             previewer = conf.qflist_previewer({}),
             sorter = sorter,
             layout_config = {
-                horizontal = { preview_width = 0.7},
+                horizontal = { preview_width = 0.4},
                 height = style.height,
                 width = style.width,
                 anchor = style.anchor,
@@ -476,7 +476,7 @@ M.custom_workspace_symbols = function()
             previewer = conf.qflist_previewer({}),
             sorter = sorter,
             layout_config = {
-                horizontal = { preview_width = 0.6},
+                horizontal = { preview_width = 0.4},
                 height = style.height,
                 width = style.width,
                 anchor = style.anchor,
