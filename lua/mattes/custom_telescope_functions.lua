@@ -1,7 +1,7 @@
 --local telescope = require("telescope")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
---local sorters = require("telescope.sorters")
+local sorters = require("telescope.sorters")
 local builtin = require("telescope.builtin")
 local fzy = require("telescope.algos.fzy")
 
@@ -518,11 +518,11 @@ M.two_column_grep_string = function(opts)
         text = text or ""
         return {
             value = entry,
-            ordinal = filename .. "$$" .. text,
+            ordinal = filename,
             display = function()
                 return displayer({
                     filename,
-                    {"$$", "TelescopeMyHint"},
+                    "#",
                     {text, "TelescopeMyHint"},
                 })
             end,
@@ -531,32 +531,15 @@ M.two_column_grep_string = function(opts)
             col = col,
         }
     end
-
-    local fzy_sorter = require("telescope.sorters")
-    local sorter = conf.generic_sorter({
-        scoring_function = function(self, prompt, line, entry, _, _)
-            local p = prompt or ""
-            p = p .. "$$" .. opts.search
-            return -1
-            --return fzy_sorter.scoring_function(self, p, line, entry, _, _)
+    local sorter = conf.generic_sorter({})
+        sorter.highlighter = function (a,b,c)
+            local positions = fzy.positions(b.."#"..opts.search, c)
+            return positions
         end
-    })
-    sorter.highlighter = function(_, prompt, line)
-        local p = prompt or ""
-        p = p .. "$$" .. opts.search
-        local positions = fzy.positions(p, line)
-        return positions
-    end
-    local generic_sorter = conf.generic_sorter({})
-    sorter.sort = function(a,b,prompt)
-        local p = prompt or ""
-        p = p .. "$$" .. opts.search
-        return generic_sorter.sort(a, b, p)
-    end
 
     local style = M.dynamic_layout_config()
     builtin.grep_string(vim.tbl_extend("force", opts, {
-        attach_mappings = function(_, map)
+        attach_mappings = function(_,_)
             return true
         end,
         entry_maker = make_entry,
@@ -570,6 +553,8 @@ M.two_column_grep_string = function(opts)
         results_title = "",
         preview_title = "",
         sorter = sorter,
+
+
     }))
 end
 return M
