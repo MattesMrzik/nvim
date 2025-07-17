@@ -52,6 +52,7 @@ local function transparent_background()
     vim.api.nvim_set_hl(0, "TreesitterContext", { bg = NONE})
     vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
     vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = "#000000" })
+    vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
 end
 
 local function spelling_underline()
