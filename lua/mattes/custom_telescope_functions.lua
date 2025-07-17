@@ -2,6 +2,7 @@
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 --local sorters = require("telescope.sorters")
+local builtin = require("telescope.builtin")
 local fzy = require("telescope.algos.fzy")
 
 local entry_display = require("telescope.pickers.entry_display")
@@ -375,6 +376,7 @@ M.custom_lsp_implementations = function()
 
         local sorter = conf.generic_sorter({})
         sorter.highlighter = function(_, line, prompt)
+            -- TODO: is this the correct order? is the line and the prompt in the line above really in this order?
             return fzy.positions(line, prompt)
         end
 
@@ -457,6 +459,7 @@ M.custom_workspace_symbols = function()
 
         local sorter = conf.generic_sorter({})
         sorter.highlighter = function (a,b,c)
+            -- TODO: why do i make this ?
             local positions = fzy.positions(b, c:sub(first_col_width, first_col_width + second_col_width))
             for i, pos in ipairs(positions) do
                 positions[i] = pos + first_col_width - 1
@@ -494,4 +497,79 @@ M.dynamic_picker = function(picker_fn, opts)
   picker_fn(opts)
 end
 
+M.two_column_grep_string = function(opts)
+    opts = opts or {}
+
+    local displayer = entry_display.create({
+        separator = " ",
+        items = {
+            { width = 40 },
+            { width = 2},
+            { remaining = true },
+        },
+    })
+
+
+    local function make_entry(entry)
+        local filename, lnum, col, text = entry:match("([^:]+):(%d+):(%d+):(.*)")
+        filename = vim.fn.fnamemodify(filename or "", ":.")
+        lnum = tonumber(lnum) or 0
+        col = tonumber(col) or 0
+        text = text or ""
+        return {
+            value = entry,
+            ordinal = filename .. "$$" .. text,
+            display = function()
+                return displayer({
+                    filename,
+                    {"$$", "TelescopeMyHint"},
+                    {text, "TelescopeMyHint"},
+                })
+            end,
+            filename = filename,
+            lnum = lnum,
+            col = col,
+        }
+    end
+
+    local fzy_sorter = require("telescope.sorters")
+    local sorter = conf.generic_sorter({
+        scoring_function = function(self, prompt, line, entry, _, _)
+            local p = prompt or ""
+            p = p .. "$$" .. opts.search
+            return -1
+            --return fzy_sorter.scoring_function(self, p, line, entry, _, _)
+        end
+    })
+    sorter.highlighter = function(_, prompt, line)
+        local p = prompt or ""
+        p = p .. "$$" .. opts.search
+        local positions = fzy.positions(p, line)
+        return positions
+    end
+    local generic_sorter = conf.generic_sorter({})
+    sorter.sort = function(a,b,prompt)
+        local p = prompt or ""
+        p = p .. "$$" .. opts.search
+        return generic_sorter.sort(a, b, p)
+    end
+
+    local style = M.dynamic_layout_config()
+    builtin.grep_string(vim.tbl_extend("force", opts, {
+        attach_mappings = function(_, map)
+            return true
+        end,
+        entry_maker = make_entry,
+        layout_strategy = "horizontal",
+        layout_config = {
+            horizontal = { preview_width = 0.4},
+            height = style.height,
+            width = style.width,
+            anchor = style.anchor,
+        },
+        results_title = "",
+        preview_title = "",
+        sorter = sorter,
+    }))
+end
 return M
