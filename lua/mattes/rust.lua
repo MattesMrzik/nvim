@@ -22,7 +22,10 @@ require'lspconfig'.rust_analyzer.setup {
     -- so the call is delayed
     on_attach = function(client, bufnr)
         vim.defer_fn(function()
-            vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+            local ft = vim.bo[bufnr].filetype
+            if not ft:match("^Diffview") then
+                vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+            end
         end, 4000)
     end,
 }

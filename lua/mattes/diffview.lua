@@ -89,7 +89,14 @@ require("diffview").setup({
     DiffviewOpen = {},
     DiffviewFileHistory = {},
   },
-  hooks = {},         -- See |diffview-config-hooks|
+  hooks = {
+      diff_buf_win_enter = function(bufnr, _)
+          vim.wo.wrap = false
+          if vim.lsp.inlay_hint then
+              vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+          end
+      end,
+  },         -- See |diffview-config-hooks|
   keymaps = {
     disable_defaults = true, -- i mattes set this to true 
     view = {

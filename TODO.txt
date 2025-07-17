@@ -16,6 +16,8 @@
     - goto struct, or is this already achived by >gt? or do i want to have a separate keybinding for this
     - (quite the edge case) jump to definition of one of the parameters passed to a ctor 
     - make >im search for nodes up in treesitter until a function or a trait def is found and then jump to these implementations
+    - if compeltion is only a single item with text then dont show it, if its lsp or so than it might still be useful bc of snippets
+    - if completions are presented then make esc close the completion menu
 
 # AI
     + https://github.com/CopilotC-Nvim/CopilotChat.nvim
@@ -33,7 +35,9 @@
     - references shows multiple entries if there are multiple refs on the same line, but since in the preview it highlights the whole line this is not useful. I could either change the highligh to only higligh the word, or filter dublicate lines
     - if show refs make title of prompt say the refs, same for impl, saying the name of the trait when on impl of trait and also when on impl of trait fn
 # blue screen of death
- - leader d (on long message) froze (disableing it)
+ + leader d (on long message) froze (disableing it): might have been solved by exiting when max_width is less than 0
+
+
 
 # colors
     - trait and typeparameter seem to have the same color in telescope
