@@ -460,6 +460,7 @@ M.custom_workspace_symbols = function()
         local sorter = conf.generic_sorter({})
         sorter.highlighter = function (a,b,c)
             -- TODO: why do i make this ?
+            -- perhaps bc i dont want to highlicth the first col?
             local positions = fzy.positions(b, c:sub(first_col_width, first_col_width + second_col_width))
             for i, pos in ipairs(positions) do
                 positions[i] = pos + first_col_width - 1
@@ -504,7 +505,6 @@ M.two_column_grep_string = function(opts)
         separator = " ",
         items = {
             { width = 40 },
-            { width = 2},
             { remaining = true },
         },
     })
@@ -522,7 +522,6 @@ M.two_column_grep_string = function(opts)
             display = function()
                 return displayer({
                     filename,
-                    "#",
                     {text, "TelescopeMyHint"},
                 })
             end,
@@ -533,7 +532,14 @@ M.two_column_grep_string = function(opts)
     end
     local sorter = conf.generic_sorter({})
         sorter.highlighter = function (a,b,c)
-            local positions = fzy.positions(b.."#"..opts.search, c)
+            local positions = fzy.positions(b, c:sub(0, 40))
+            if opts.search and #opts.search > 0 then
+                local second_col = c:sub(41)
+                local search_positions = fzy.positions(opts.search, second_col)
+                for _, pos in ipairs(search_positions) do
+                    table.insert(positions, 40 + pos)
+                end
+            end
             return positions
         end
 
