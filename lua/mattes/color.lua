@@ -50,10 +50,11 @@ local function transparent_background()
     vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
     vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "Grey" })
     vim.api.nvim_set_hl(0, "TreesitterContext", { bg = NONE})
-    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
-    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = "#000000" })
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = "#85a5b2" })
     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
 end
+
 
 local function spelling_underline()
     vim.api.nvim_set_hl(0, "SpellBad", {

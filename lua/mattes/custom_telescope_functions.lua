@@ -221,7 +221,6 @@ local function filter_function_defs_from_references(references)
             return true
         end
     end, references)
-    print("filtered " .. #references - #filtered_references)
     return filtered_references
 end
 

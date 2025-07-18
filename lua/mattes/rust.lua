@@ -18,6 +18,7 @@ require'lspconfig'.rust_analyzer.setup {
             },
         }
     },
+    --handelrs = {["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded"})},
     -- since the lsp takes some time to startup, calling the inlay_hint immediately has no effect
     -- so the call is delayed
     on_attach = function(client, bufnr)
@@ -26,10 +27,18 @@ require'lspconfig'.rust_analyzer.setup {
             if not ft:match("^Diffview") then
                 vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
             end
+            --local hover = vim.lsp.buf.hover
+            -----@diagnostic disable-next-line: duplicate-set-field
+            --vim.lsp.buf.hover = function()
+            --    return hover({
+            --        max_width = 100,
+            --        max_height = 14,
+            --        border = utils.border,
+            --   })
+            --end
         end, 4000)
     end,
 }
-
 
 -- enables cargo fmt on save, i think this might be less efficient than rust fmt since 
 -- cargo does every file (i think) and not only the changed ones, but (i think) cargo fmt produces better formats

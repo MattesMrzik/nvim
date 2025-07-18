@@ -73,8 +73,9 @@ vim.keymap.set("n", "<leader>fs", function()
     local search = vim.fn.input("Grep > ")
     if search == "" then
         print("No search term provided")
+    else
+        cs.two_column_grep_string({search = search})
     end
-    cs.two_column_grep_string({search = search})
 end, { desc = "Search with grep" })
 
 vim.keymap.set("n", "<leader>ss", function()

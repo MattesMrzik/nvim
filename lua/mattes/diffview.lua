@@ -256,13 +256,11 @@ function M.jump_between_right_file_and_file_over_view_pane()
   local cur_ft = vim.bo.filetype
   if cur_ft == "DiffviewFiles" then
     -- We're in the file panel → jump right twice
-    print("cur_ft = ", cur_ft, ", move to right")
     -- cur_cur_ftft
     vim.cmd("wincmd l")
     vim.cmd("wincmd l")
   else
     -- We're not in the file panel → focus it
-    print("cur_ft = ",cur_ft,", focus files")
     vim.cmd("DiffviewFocusFiles")
   end
 end

@@ -1,5 +1,17 @@
 -- close on first esc not second
 local actions = require("telescope.actions")
+local function custom_ui_select_theme()
+  local width = 0.4
+  local height = 0.4 
+  --local height = math.floor(vim.o.lines * 0.3)
+  --local height = math.floor(vim.o.lines * 0.3)
+  return {
+    width = width,
+    height = height,
+    previewer = false,
+    prompt_title = false,
+  }
+end
 require("telescope").setup({
     defaults = {
         mappings = {
@@ -14,9 +26,7 @@ require("telescope").setup({
     },
     extensions = {
         ["ui-select"] = {
-            require("telescope.themes").get_dropdown {
-                -- even more opts
-            }
+            custom_ui_select_theme()
         }
     }
 })
