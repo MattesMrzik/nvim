@@ -3,7 +3,12 @@ snacks.setup {
     animate = { enabled = false },
     bigfile = { enabled = true },
     dashboard = { enabled = false},
-    indent = { enabled = true, char = "x" },
+    indent = {
+        enabled = true,
+        animate = {
+            enabled = false,
+        }
+    },
     input = { enabled = true },
     picker = {
         enabled = true,
