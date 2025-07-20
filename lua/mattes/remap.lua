@@ -1,9 +1,6 @@
--- useful hotkeys
--- K -> hover lsp info
-
 -- basic
 vim.g.mapleader = " "
-vim.keymap.set("n", "<leader>e", vim.cmd.Ex)
+vim.keymap.set("n", "<leader>e", function() Snacks.explorer() end)
 vim.keymap.set("v", "cc", '"+y')
 vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<leader>th", require("mattes.color").my_toggle_theme, {desc = "Toggle theme"})
@@ -11,6 +8,12 @@ vim.keymap.set("n", "<C-j>", "<C-e>", { noremap = true, desc = "Scroll view down
 vim.keymap.set("n", "<C-k>", "<C-y>", { noremap = true, desc = "Scroll view up" })
 vim.keymap.set("n", "*", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true }) -- highlight without jumping
 vim.keymap.set("n", "#", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true })
+
+-- snacks
+-- seting the leader ch to the command Snacks.picker.command_history({ layout = { preset = "dropdown", preview = false } }) in the next line
+vim.keymap.set("n", "<leader>ch", function() Snacks.picker.command_history({ layout = { preset = "dropdown", preview = false } }) end, { desc = "Snacks command history picker" })
+vim.keymap.set("n", "<leader>sp", function() Snacks.picker.spelling({ layout = { preset = "select", preview = false } })end)
+vim.keymap.set("n","<leader>/", function() Snacks.picker.lines() end)
 
 
 -- copilot
@@ -34,7 +37,7 @@ vim.keymap.set('n', ']d', function() vim.diagnostic.goto_next({ float = false })
 vim.keymap.set('n', '[d', function() vim.diagnostic.goto_prev({ float = false }) end)
 
 -- trouble
-vim.keymap.set("n", "<leader>ww", require("mattes.trouble").toggle_diagnostics_and_focus_its_window, { desc = "Toggles and focuses trouble window"})
+vim.keymap.set("n", "<leader>ww", function() Snacks.picker.diagnostics() end, { desc = "Toggles and focuses trouble window"})
 
 -- undo tree
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
@@ -48,6 +51,7 @@ vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementatio
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
 vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
 vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
+vim.keymap.set("n", "K", function() vim.lsp.buf.hover({border = "rounded"}) end, { desc = "LSP Hover" })
 
 -- cmp
 -- see rust.lua
@@ -70,13 +74,27 @@ vim.keymap.set('n', '<leader>ff', function() cs.dynamic_picker(builtin.find_file
 --    builtin.grep_string({ search = search , layout_config = cs.dynamic_layout_config(), results_title = "", preview_title = ""})
 --end, {desc = "Search with grep"})
 vim.keymap.set("n", "<leader>fs", function()
-    local search = vim.fn.input("Grep > ")
-    if search == "" then
-        print("No search term provided")
-    else
-        cs.two_column_grep_string({search = search})
-    end
+    vim.ui.input({ prompt = "Enter your input: " }, function(input)
+        if input ~= nil then
+            cs.two_column_grep_string({search = input})
+        end
+    end)
 end, { desc = "Search with grep" })
+vim.keymap.set("n", "<leader>fa", function()
+    Snacks.picker.grep({
+        layout = {
+            layout = {
+                width = 0.99,
+                height = 0.3,
+                box = "horizontal",
+                position = "float",
+                col = 0,
+                row = 0,
+            },
+        }
+    }
+) end)
+vim.keymap.set("n", "<leader>fb", function() Snacks.picker.buffers() end)
 
 vim.keymap.set("n", "<leader>ss", function()
   local fname = vim.api.nvim_buf_get_name(0)

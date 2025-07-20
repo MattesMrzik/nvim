@@ -24,10 +24,4 @@ require("telescope").setup({
             --horizontal = {width = 0.9, height = 0.9}
         },
     },
-    extensions = {
-        ["ui-select"] = {
-            custom_ui_select_theme()
-        }
-    }
-})
-require("telescope").load_extension("ui-select")
+}

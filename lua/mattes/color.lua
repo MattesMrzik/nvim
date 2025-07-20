@@ -9,6 +9,7 @@ require('kanagawa').setup({
     transparent = false,         -- do not set background color
     dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
     terminalColors = true,       -- define vim.g.terminal_color_{0,17}
+    -- https://github.com/rebelot/kanagawa.nvim/blob/debe91547d7fb1eef34ce26a5106f277fbfdd109/lua/kanagawa/themes.lua#L198
     colors = {                   -- add/modify theme and palette colors
         palette = {dragonBlack0 = "#0d0c0c",--#0d0c0c,
         dragonBlack1 = "#12120f",--#12120f
@@ -17,6 +18,7 @@ require('kanagawa').setup({
         dragonBlack4 = "#282727",
         dragonBlack5 = "#1f1e1c",--#393836 this is the current line highlight and maybe something else
         dragonBlack6 = "#625e5a",
+        oldWhite = "#c4c9c5",
         },
         theme = { wave = {}, lotus = {}, dragon = {}, all = { ui = {
             bg_gutter = "none"
@@ -27,11 +29,11 @@ require('kanagawa').setup({
         return {
             TelescopeTitle = { fg = theme.ui.special, bold = true },
             TelescopePromptNormal = { bg = NONE},
-            TelescopePromptBorder = { fg = theme.ui.bg_m1, bg = NONE },
+            TelescopePromptBorder = { fg = "#7da5b3", bg = NONE },
             TelescopeResultsNormal = { fg = theme.ui.fg_dim, bg = NONE },
-            TelescopeResultsBorder = { fg = theme.ui.bg_m1, bg =NONE },
+            TelescopeResultsBorder = { fg = "#7da5b3", bg =NONE },
             TelescopePreviewNormal = { bg = NONE },
-            TelescopePreviewBorder = { bg = NONE, fg = theme.ui.bg_m1},
+            TelescopePreviewBorder = { bg = NONE, fg = "#7da5b3"},
             Pmenu = { fg = theme.ui.shade0, bg = theme.ui.bg_p1 },  -- add `blend = vim.o.pumblend` to enable transparency
             PmenuSel = { fg = "NONE", bg = theme.ui.bg_p2 },
             PmenuSbar = { bg = theme.ui.bg_m1 },
@@ -108,7 +110,7 @@ local function telescope_colors()
 end
 
 local function set_copilot_suggestion_color()
-    vim.cmd([[highlight! link CopilotSuggestion String]])
+    vim.api.nvim_set_hl(0, "CopilotSuggestion", {fg  = "#82390d", italic = true })
 end
 
 transparent_background()
@@ -132,10 +134,10 @@ function M.my_toggle_theme()
         vim.notify("Switching to theme kanagawa-dragon")
         require("kanagawa").setup({ theme = "dragon" })
         vim.cmd("colorscheme kanagawa")
+        vim.ui.fg_dim = "#c4c9c5"
         telescope_colors()
         spelling_underline()
         transparent_background()
-        set_copilot_suggestion_color()
         current = 0
    end
 end

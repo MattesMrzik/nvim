@@ -50,3 +50,4 @@ nvim-treesitter/playground
 # did download the arm64 5.1 from https://github.com/gptlang/lua-tiktoken/releases and put it in (with the name "tiktoken_core.so") /opt/homebrew/lib/lua/5.1 (and just to be safe also in /usr/local/lib/lua/5.4). then upon running it said sth like "downloading tiktoken" 
 
 
+brew install fd

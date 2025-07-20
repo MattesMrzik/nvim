@@ -1,13 +1,13 @@
-# make word end on _
-# if search symbold and type method or funtion then sort by line number
-# maybe make arrow keys select item from the completion list
-
-# multiple cursors
-# telesope associanted symbols, for example if i am in the body of a struct / impl block then show associated methods, perhaps with leaser as (associated symbols)
-# vi( if the next pair () dosnt contain any chars
-# cmp remove case sensitivityy, since when i start typing wiht start being capital it seems to be case sensitive
-# make >jj disable inlay hints for that buffer
-# after renaming a var, call save all buffers
+# basic
+    - make word end on _
+    - if search symbold and type method or funtion then sort by line number
+    - maybe make arrow keys select item from the completion list
+    - multiple cursors
+    - telesope associanted symbols, for example if i am in the body of a struct / impl block then show associated methods, perhaps with leaser as (associated symbols)
+    - vi( if the next pair () dosnt contain any chars
+    - cmp remove case sensitivityy, since when i start typing wiht start being capital it seems to be case sensitive
+    - after renaming a var, call save all buffers
+    - popup for grep and :command -> dont anchor at zz but sligly above or below the cursor:
 
 # movement and selection 
     - jump to next fn or impl or struct def
@@ -18,7 +18,7 @@
     - make >im search for nodes up in treesitter until a function or a trait def is found and then jump to these implementations
     - if compeltion is only a single item with text then dont show it, if its lsp or so than it might still be useful bc of snippets
     - if completions are presented then make esc close the completion menu
-
+    - grep with snakc
 # AI
     + https://github.com/CopilotC-Nvim/CopilotChat.nvim
     - bindings for accepting diff and much more: github.com/jellydn/lazy-nvim-ide/blob/main/lua/plugins/extras/copilot-chat-v2.lua

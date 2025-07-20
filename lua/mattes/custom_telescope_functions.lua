@@ -167,9 +167,6 @@ M.custom_lsp_document_symbols = function()
         sorter.highlighter = function (a,b,c)
             return fzy.positions(b,c:sub(0,36))
         end
-        local cursor_line = vim.fn.winline()
-        local total_lines = vim.api.nvim_win_get_height(0)
-        local is_bottom = cursor_line > total_lines / 2
         local style = M.dynamic_layout_config()
 
         pickers.new({}, {
