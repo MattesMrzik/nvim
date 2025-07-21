@@ -10,11 +10,25 @@ vim.keymap.set("n", "*", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { no
 vim.keymap.set("n", "#", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true })
 
 -- snacks
--- seting the leader ch to the command Snacks.picker.command_history({ layout = { preset = "dropdown", preview = false } }) in the next line
 vim.keymap.set("n", "<leader>ch", function() Snacks.picker.command_history({ layout = { preset = "dropdown", preview = false } }) end, { desc = "Snacks command history picker" })
 vim.keymap.set("n", "<leader>sp", function() Snacks.picker.spelling({ layout = { preset = "select", preview = false } })end)
 vim.keymap.set("n","<leader>/", function() Snacks.picker.lines() end)
-
+vim.keymap.set("n", "<leader>fa", function()
+    Snacks.picker.grep({
+        layout = {
+            layout = {
+                width = 0.999,
+                height = 0.3,
+                box = "horizontal",
+                position = "float",
+                col = 0,
+                row = 0,
+            },
+        }
+    }
+) end)
+vim.keymap.set("n", "<leader>fb", function() Snacks.picker.buffers() end)
+vim.keymap.set("n", "<leader>fn", function() Snacks.picker.notifications() end)
 
 -- copilot
 vim.keymap.set("n", "<leader>cp", function() require("CopilotChat").toggle() end, { desc = "Toggle Copilot Chat" })
@@ -47,7 +61,7 @@ vim.keymap.set("n", "<leader>gs", vim.cmd.Git);
 
 -- lsp
 vim.keymap.set("n", "<leader>gt", require("mattes.rust").jump_to_trait, { desc = "Go to trait definition from impl" })
-vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
+--vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
 vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
 vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
@@ -80,21 +94,6 @@ vim.keymap.set("n", "<leader>fs", function()
         end
     end)
 end, { desc = "Search with grep" })
-vim.keymap.set("n", "<leader>fa", function()
-    Snacks.picker.grep({
-        layout = {
-            layout = {
-                width = 0.99,
-                height = 0.3,
-                box = "horizontal",
-                position = "float",
-                col = 0,
-                row = 0,
-            },
-        }
-    }
-) end)
-vim.keymap.set("n", "<leader>fb", function() Snacks.picker.buffers() end)
 
 vim.keymap.set("n", "<leader>ss", function()
   local fname = vim.api.nvim_buf_get_name(0)
@@ -105,6 +104,14 @@ vim.keymap.set("n", "<leader>ss", function()
     require("telescope.builtin").lsp_document_symbols()
   end
 end, { desc = "Search symbols in current file" })
+vim.keymap.set("n", "<leader>in", function()
+    local fname = vim.api.nvim_buf_get_name(0)
+    if fname:sub(-3) == ".rs" then
+        cs._custom_lsp_implementations()
+    else
+        require("telescope.builtin").lsp_implementations()
+    end
+end)
 vim.keymap.set("n", "<leader>im", function()
     local fname = vim.api.nvim_buf_get_name(0)
     if fname:sub(-3) == ".rs" then
@@ -112,7 +119,7 @@ vim.keymap.set("n", "<leader>im", function()
     else
         require("telescope.builtin").lsp_implementations()
     end
-end, {desc = "Search implementations"})
+end)
 --vim.keymap.set('n', '<C-[>', '<cmd>Telescope lsp_references<CR>', { desc = "Search symbols in current file" })
 --vim.keymap.set("n", "<C-[>", function()
 vim.keymap.set("n", "<leader>k", function()
@@ -124,6 +131,9 @@ vim.keymap.set("n", "<leader>k", function()
     end
 end, {desc = "Search references"})
 vim.keymap.set("n", "<leader>ws", function() cs.custom_workspace_symbols() end, {desc =  "custom Workspace symbols"})
+
+vim.keymap.set("n", "<leader>pp", function() cs.workspace_2() end, { desc = "Telescope dynamic workspace symbols" })
+
 
 -- DiffView
 vim.keymap.set("n", "<leader>jj", require("mattes.diffview").toggle_diff_view, { desc = "Toggles diffview"})

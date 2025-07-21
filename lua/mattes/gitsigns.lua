@@ -1,6 +1,12 @@
 require('gitsigns').setup{
     on_attach = function(bufnr)
+        -- local bt = vim.bo[bufnr].buftype
+        -- if bt == 'nofile' or bt == 'prompt' or bt == 'help' then
+        --     print("gitsigns: not attaching to buffer " .. bufnr .. " with buftype " .. bt)
+        --     return false
+        -- end
         local gitsigns = require('gitsigns')
+
 
         local function map(mode, l, r, opts)
             opts = opts or {}
@@ -61,22 +67,6 @@ require('gitsigns').setup{
         map({'o', 'x'}, 'ih', gitsigns.select_hunk)
     end
 }
-
-
-
-
-
-
-
-
-
-
-
--- this is still unpolished
---
-
-
-
 
 
 

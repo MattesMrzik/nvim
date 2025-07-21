@@ -7,7 +7,7 @@ local fzy = require("telescope.algos.fzy")
 
 local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
-
+local highlight = require("snacks.picker.util.highlight")
 local M = {}
 local kind_icons = {
     Text = "",
@@ -15,7 +15,7 @@ local kind_icons = {
     Function = "",
     Constructor = "",
     Field = "",
-    Variable = "󱄑",
+    Variable = "",
     Class = "",
     Struct = "",
     Interface = "",
@@ -118,22 +118,67 @@ M.dynamic_layout_config = function()
     }
 end
 
+local function get_highlights(text_and_hl)
+    local highlights = {}
+    local end_string = ""
+    local sep = " "
+    for i = 1, #text_and_hl do
+        local text, hl_fn, col = text_and_hl[i][1], text_and_hl[i][2], text_and_hl[i][3]
+        if text == nil then
+            text = ""
+        end
+        if #text < col then
+            text = text .. string.rep(" ", col - #text)
+        end
+        if #text > col then
+            text = text:sub(1, col)
+        end
+        local highlights_for_col = hl_fn(text, #end_string)
+        for hl_i = 1, #highlights_for_col do
+            table.insert(highlights, highlights_for_col[hl_i])
+        end
+        end_string = end_string ..  text .. sep
+    end
+    return end_string, highlights
+end
+
+local function highlight_code(lang)
+    return function(code, offset)
+        local hls = {}
+        highlight.format({}, code, hls, { lang = lang })
+        -- print(vim.inspect(hls))
+        local telescope_highlights = {}
+        for _, extmark in ipairs(hls) do
+            if extmark.col and extmark.end_col and extmark.hl_group then
+                table.insert(telescope_highlights, { {extmark.col + offset, extmark.end_col + offset}, extmark.hl_group })
+            end
+        end
+        return telescope_highlights
+    end
+end
+
+local function return_hl_as_fn(hl)
+    return function(text, offset)
+        return {{{offset, #text + offset}, hl}}
+    end
+end
+
+local function sub_fzy(start, end_col)
+    return function(_, prompt, line)
+        local positions = fzy.positions(prompt, line:sub(start, end_col))
+        for i, pos in ipairs(positions) do
+            positions[i] = pos + start - 1
+        end
+        return positions
+    end
+end
+
 M.custom_lsp_document_symbols = function()
     vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, ctx, _)
         if err or not symbols then return end
 
         local flat_symbols = {}
         flatten(symbols, flat_symbols)
-
-        local displayer = entry_display.create({
-            separator = " ",
-            items = {
-                { width = 2 },
-                { width = 30},
-                { width = 40},
-                { remaining = true },
-            },
-        })
 
         local function make_entry(symbol)
             local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
@@ -146,14 +191,16 @@ M.custom_lsp_document_symbols = function()
             local custom = get_block_info(symbol.range.start.line+1, 0) or ""
             return {
                 value = symbol,
-                ordinal = symbol.name .. " " .. kind, -- i can search "method" and it then only displays methods
+                ordinal = symbol.name .. " " .. kind,
                 display = function()
-                    return displayer({
-                        { icon , hl },
-                        symbol.name,
-                        {custom, "TelescopeMyHint"},
-                        {detail, "TelescopeMyHint"},
-                    })
+                    local highlighted_text, highlights = get_highlights(
+                        {
+                            {icon, return_hl_as_fn(hl), 3},
+                            {symbol.name, return_hl_as_fn(hl), 30},
+                            {custom, highlight_code("rust"), 30},
+                        }
+                    )
+                    return highlighted_text, highlights
                 end,
                 lnum = symbol.selectionRange.start.line + 1,
                 col = symbol.selectionRange.start.character + 1,
@@ -164,9 +211,7 @@ M.custom_lsp_document_symbols = function()
         local sorter = conf.generic_sorter({})
 
         -- the highlighter should only highlight the (first and) second col, ie where the name is in 
-        sorter.highlighter = function (a,b,c)
-            return fzy.positions(b,c:sub(0,36))
-        end
+        sorter.highlighter = sub_fzy(4, 34)
         local style = M.dynamic_layout_config()
 
         pickers.new({}, {
@@ -296,12 +341,21 @@ end
 
 local function load_buffer_and_treesitter_parse(filename)
     local bufnr = vim.fn.bufnr(filename)
+    local was_open = vim.api.nvim_buf_is_loaded(bufnr)
     if bufnr == -1 then
+        -- assigns new buffer number
         bufnr = vim.fn.bufnr(filename, true)
     end
+    if not vim.fn.bufloaded(bufnr) then
+        vim.api.nvim_buf_set_var(bufnr, 'gitsigns_disable', true)
+        vim.b[bufnr].gitsigns_disable = true
+        vim.bo[bufnr].filetype = "nofile"
+        print("Loading buffer: " .. filename)
 
-    if vim.fn.bufloaded(bufnr) ~= 1 then
         vim.fn.bufload(bufnr)
+
+        require("gitsigns").detach(bufnr)
+        vim.api.nvim_buf_set_option(0, 'statusline', '')
         local parser = vim.treesitter.get_parser(bufnr, "rust")
         if not parser then
             print("No parser available for language: " .. lang)
@@ -313,12 +367,12 @@ local function load_buffer_and_treesitter_parse(filename)
             print("Failed to parse buffer")
             return nil
         end
-        vim.fn.bufload(bufnr)
+        --vim.fn.bufload(bufnr)
     end
-    return bufnr
+    return bufnr, was_open
 end
 
-M.custom_lsp_implementations = function()
+M._custom_lsp_implementations = function()
     vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
         if err or not implementations then
             vim.notify("No implementations found", vim.log.levels.INFO)
@@ -398,9 +452,64 @@ M.custom_lsp_implementations = function()
         }):find()
     end)
 end
+M.custom_lsp_implementations = function()
+    local Snacks = require("snacks")
+    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
+        if err or not implementations then
+            vim.notify("No implementations found", vim.log.levels.INFO)
+            return
+        end
 
+        local current_file = vim.api.nvim_buf_get_name(0)
+        local cursor_pos = vim.api.nvim_win_get_cursor(0)
+        local filtered = vim.tbl_filter(function(impl)
+            return not (
+                vim.uri_to_fname(impl.targetUri) == current_file and
+                impl.targetSelectionRange.start.line + 1 == cursor_pos[1]
+            )
+        end, implementations)
+
+        if #filtered == 0 then
+            vim.notify("No other implementations found", vim.log.levels.INFO)
+            return
+        end
+
+        local items = {}
+        for _, impl in ipairs(filtered) do
+            local filename = vim.uri_to_fname(impl.targetUri)
+            filename = vim.fn.fnamemodify(filename, ":.")
+            local line = impl.targetSelectionRange.start.line
+            local col = impl.targetSelectionRange.start.character
+            local bufnr = load_buffer_and_treesitter_parse(filename)
+            local custom = get_block_info(line, bufnr) or ""
+
+            table.insert(items, {
+                value = impl,
+                file = filename,
+                preview = {
+                    file = filename,
+                    line = line + 1,
+                    col = col,
+                },
+                --line = custom,
+                pos = {line + 1, col},
+                text = custom,
+            })
+        end
+
+        Snacks.picker {
+            title = "LSP Implementations",
+            items = items,
+            matcher = {
+                mods = {
+                    field = "file",
+                }
+            }
+        }
+    end)
+end
 M.custom_workspace_symbols = function()
-    vim.lsp.buf_request(0, "workspace/symbol", {query = ""}, function(err, symbols, ctx, _)
+    vim.lsp.buf_request(0, "workspace/symbol", {query = "", searchKind = "allSymbols"}, function(err, symbols, ctx, _)
         if err then
             print("LSP error:", vim.inspect(err))
             return
@@ -411,18 +520,11 @@ M.custom_workspace_symbols = function()
         end
         local flat_symbols= {}
         flatten(symbols, flat_symbols)
+
+        M.get_cached_work_space_symbols_block_info(flat_symbols)
+        --print(vim.inspect(M.cached_work_space_symbols_cleaned))
         local first_col_width = 40
         local second_col_width = 30
-
-        -- this are the columns, here only one
-        local displayer = entry_display.create({
-            separator = " ",
-            items = {
-                {width = first_col_width},
-                {width = second_col_width},
-                { remaining = true },
-            },
-        })
 
         local function make_entry(symbol)
             local filename = vim.uri_to_fname(symbol.location.uri)
@@ -437,15 +539,20 @@ M.custom_workspace_symbols = function()
 
             local hl = kind_highlights[kind] or ""
 
+            local key = filename .. ":" .. lnum .. ":" .. col .. ":" .. name
+            local custom = M.cached_work_space_symbols[key]
+
             return {
                 value = symbol,
                 ordinal = name .. " " .. kind,
-                display = function()
-                    return displayer({
-                        filename,
-                        name,
-                        {kind, hl},
+                display = function ()
+                    local t, h = get_highlights({
+                        {filename, return_hl_as_fn("oldWhite"), first_col_width},
+                        {name, return_hl_as_fn("oldWhite"), second_col_width},
+                        {kind, return_hl_as_fn(hl), 10},
+                        {custom, highlight_code("rust"), 30},
                     })
+                    return t, h
                 end,
                 filename = filename,
                 lnum = lnum + 1,
@@ -454,15 +561,7 @@ M.custom_workspace_symbols = function()
         end
 
         local sorter = conf.generic_sorter({})
-        sorter.highlighter = function (a,b,c)
-            -- TODO: why do i make this ?
-            -- perhaps bc i dont want to highlicth the first col?
-            local positions = fzy.positions(b, c:sub(first_col_width, first_col_width + second_col_width))
-            for i, pos in ipairs(positions) do
-                positions[i] = pos + first_col_width - 1
-            end
-            return positions
-        end
+        sorter.highlighter = sub_fzy(first_col_width, first_col_width + second_col_width)
         local style = M.dynamic_layout_config()
         pickers.new({}, {
             prompt_title = "My LSP Workspace symbols",
@@ -474,7 +573,7 @@ M.custom_workspace_symbols = function()
                 entry_maker = make_entry,
             }),
             previewer = conf.qflist_previewer({}),
-            sorter = sorter,
+            sorter = sorter, 
             layout_config = {
                 horizontal = { preview_width = 0.4},
                 height = style.height,
@@ -527,17 +626,18 @@ M.two_column_grep_string = function(opts)
         }
     end
     local sorter = conf.generic_sorter({})
-        sorter.highlighter = function (a,b,c)
-            local positions = fzy.positions(b, c:sub(0, 40))
-            if opts.search and #opts.search > 0 then
-                local second_col = c:sub(41)
-                local search_positions = fzy.positions(opts.search, second_col)
-                for _, pos in ipairs(search_positions) do
-                    table.insert(positions, 40 + pos)
-                end
+    sorter.highlighter = function (a,b,c)
+        local positions = fzy.positions(b, c:sub(0, 40))
+        -- highlight the grep prompt in the string
+        if opts.search and #opts.search > 0 then
+            local second_col = c:sub(41)
+            local search_positions = fzy.positions(opts.search, second_col)
+            for _, pos in ipairs(search_positions) do
+                table.insert(positions, 40 + pos)
             end
-            return positions
         end
+        return positions
+    end
 
     local style = M.dynamic_layout_config()
     builtin.grep_string(vim.tbl_extend("force", opts, {
@@ -558,5 +658,159 @@ M.two_column_grep_string = function(opts)
 
 
     }))
+end
+
+M.cached_work_space_symbols = {}
+M.cached_work_space_symbols_cleaned = {}
+
+M.get_cached_work_space_symbols_block_info = function(flat_symbols)
+    M.cached_work_space_symbols_cleaned = {}
+    -- sort flat symbols by file name
+    table.sort(flat_symbols, function(a, b)
+        return a.location.uri < b.location.uri
+    end)
+    local last_file = nil
+    local last_bufnr = nil
+    local last_was_open = true 
+    for i, symbol in ipairs(flat_symbols) do
+        local file_name = vim.uri_to_fname(symbol.location.uri)
+        file_name = vim.fn.fnamemodify(file_name, ":.")
+        local lnum = symbol.location.range.start.line
+        local col = symbol.location.range.start.character
+        local name = symbol.name
+        local key = file_name .. ":" .. lnum .. ":" .. col .. ":" .. name
+        if M.cached_work_space_symbols[key] then
+            M.cached_work_space_symbols_cleaned[key] = M.cached_work_space_symbols[key]
+        else
+            if last_file ~= file_name then
+                -- close last buffer if it was open
+                if last_bufnr ~= nil and vim.api.nvim_buf_is_loaded(last_bufnr) and not last_was_open then
+                    vim.api.nvim_buf_delete(last_bufnr, {force = true})
+                end
+                -- load new buffer
+                local bufnr = vim.fn.bufnr(file_name)
+                if bufnr == -1 then
+                    -- assigns new buffer number
+                    bufnr = vim.fn.bufnr(file_name, true)
+                end
+                if vim.fn.bufloaded(bufnr) ~= 1 then
+                    last_was_open = false
+                    vim.bo[bufnr].filetype = "nofile"
+                    vim.fn.bufload(bufnr)
+                else
+                    last_was_open = true
+                end
+                local parser = vim.treesitter.get_parser(bufnr, "rust")
+                if not parser then
+                    print("No parser available for language: rust")
+                end
+                local tree = parser:parse()[1]
+                if not tree then
+                    print("Failed to parse buffer")
+                end
+                last_file = file_name
+                last_bufnr = bufnr
+            end
+            if last_bufnr then
+                local custom = get_block_info(lnum, last_bufnr) or ""
+                M.cached_work_space_symbols_cleaned[key] = custom
+            end
+        end
+    end
+    M.cached_work_space_symbols = M.cached_work_space_symbols_cleaned
+end
+
+M.workspace_dynamic = function()
+    local first_col_width = 30
+    local second_col_width = 30
+
+    local sorter = conf.generic_sorter({})
+    sorter.highlighter = sub_fzy(first_col_width, first_col_width + second_col_width)
+    require('telescope.builtin').lsp_dynamic_workspace_symbols({
+        entry_maker = function(symbol)
+            -- print("inside entry_maker")
+            -- print("symbol: ", vim.inspect(symbol))
+            local filename = symbol.filename
+            filename = vim.fn.fnamemodify(filename, ":.")
+            local lnum = symbol.lnum
+            local col = symbol.col
+            local name = symbol.text
+            -- the text is something like "[Struct] MyStruct" but also for other kinds, and i want to only have "MyStruct"
+            if name:sub(1, 1) == "[" and name:find("]") then
+                name = name:sub(name:find("]") + 2)
+            end
+
+            local kind =symbol.kind
+            if kind == "Interface" or kind == "Object" then
+                kind = "Trait"
+            end
+
+            -- print("kind: ", kind)
+            local hl = kind_highlights[kind] or ""
+            -- print("hl: ", hl)
+            -- print("symbol: ", vim.inspect(symbol))
+            return {
+                value = symbol,
+                ordinal = name .. " " .. kind,
+                display = function ()
+                    local t, h = get_highlights({
+                        {filename, return_hl_as_fn("oldWhite"), first_col_width},
+                        {name, return_hl_as_fn("oldWhite"), second_col_width},
+                        {kind, return_hl_as_fn(hl), 10},
+                    })
+                    return t, h
+                end,
+                filename = filename,
+                lnum = lnum ,
+                col = col,
+            }
+        end,
+        slow_entry_maker = function(symbol)
+            print("inside slow entry_maker")
+            -- print("symbol: ", vim.inspect(symbol))
+            local filename = symbol.filename
+            filename = vim.fn.fnamemodify(filename, ":.")
+            local lnum = symbol.lnum
+            local col = symbol.col
+            local name = symbol.text
+            -- the text is something like "[Struct] MyStruct" but also for other kinds, and i want to only have "MyStruct"
+            if name:sub(1, 1) == "[" and name:find("]") then
+                name = name:sub(name:find("]") + 2)
+            end
+
+            local kind =symbol.kind
+            if kind == "Interface" or kind == "Object" then
+                kind = "Trait"
+            end
+
+            -- print("kind: ", kind)
+            local hl = kind_highlights[kind] or ""
+            local custom = ""
+            if kind == "Function" then
+                local bufnr = load_buffer_and_treesitter_parse(filename)
+                custom = get_block_info(lnum, bufnr) or ""
+            end
+            -- print("hl: ", hl)
+            -- print("symbol: ", vim.inspect(symbol))
+            return {
+                value = symbol,
+                ordinal = name .. " " .. kind,
+                display = function ()
+                    local t, h = get_highlights({
+                        {filename, return_hl_as_fn("oldWhite"), first_col_width},
+                        {name, return_hl_as_fn("oldWhite"), second_col_width},
+                        {kind, return_hl_as_fn(hl), 10},
+                        {custom, highlight_code("rust"), 30},
+                    })
+                    return t, h
+                end,
+                filename = filename,
+                lnum = lnum ,
+                col = col,
+            }
+        end,
+
+        sorter = sorter,
+    })
 end
 return M

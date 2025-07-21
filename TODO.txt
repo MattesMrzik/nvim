@@ -8,21 +8,24 @@
     - cmp remove case sensitivityy, since when i start typing wiht start being capital it seems to be case sensitive
     - after renaming a var, call save all buffers
     - popup for grep and :command -> dont anchor at zz but sligly above or below the cursor:
+    - does spell check strings?
 
 # movement and selection 
     - jump to next fn or impl or struct def
     + jump to trait puts cursor on impl block and then calls goto definition. when i then press c-o i go back to that impl block and not the position where i pressed >gt: Solved by passing params to the lspcall
-    - expand and shrink selection wiht tree sitter
+    - expand and shrink selection with tree sitter
     - goto struct, or is this already achived by >gt? or do i want to have a separate keybinding for this
     - (quite the edge case) jump to definition of one of the parameters passed to a ctor 
     - make >im search for nodes up in treesitter until a function or a trait def is found and then jump to these implementations
     - if compeltion is only a single item with text then dont show it, if its lsp or so than it might still be useful bc of snippets
     - if completions are presented then make esc close the completion menu
-    - grep with snakc
-# AI
     + https://github.com/CopilotC-Nvim/CopilotChat.nvim
     - bindings for accepting diff and much more: github.com/jellydn/lazy-nvim-ide/blob/main/lua/plugins/extras/copilot-chat-v2.lua
+    - sub_fzy when matching against kind of var disables the highlights, instead i could make fzy include the kind in the line string and just remove
 
+# snacks
+    - grep
+    - cliphist :lua Snacks.picker.cliphist(opts?)
 # diagonstics
     make write on a file update diagnostics for every buffer
 # GREP leader>fs

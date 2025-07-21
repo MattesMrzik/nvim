@@ -134,10 +134,10 @@ function M.my_toggle_theme()
         vim.notify("Switching to theme kanagawa-dragon")
         require("kanagawa").setup({ theme = "dragon" })
         vim.cmd("colorscheme kanagawa")
-        vim.ui.fg_dim = "#c4c9c5"
         telescope_colors()
         spelling_underline()
         transparent_background()
+        set_copilot_suggestion_color()
         current = 0
    end
 end

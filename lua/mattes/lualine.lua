@@ -57,6 +57,9 @@ set_fg(custom_powerline, "#c4c9c5", "#9e9e9e")
 require('lualine').setup({
     options = {
         theme = custom_powerline,
+        disabled_filetypes = {
+            'nofile',
+        }
     },
     sections = {
         lualine_c = {
@@ -69,5 +72,5 @@ require('lualine').setup({
         lualine_c = {
             { 'filename', path = 1},
         },
-    }, 
+    },
 })
