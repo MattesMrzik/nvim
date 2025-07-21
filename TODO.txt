@@ -23,6 +23,9 @@
     - bindings for accepting diff and much more: github.com/jellydn/lazy-nvim-ide/blob/main/lua/plugins/extras/copilot-chat-v2.lua
     - sub_fzy when matching against kind of var disables the highlights, instead i could make fzy include the kind in the line string and just remove
 
+# cmp
+    - no popuo when single item is available
+
 # snacks
     - grep
     - cliphist :lua Snacks.picker.cliphist(opts?)
@@ -37,6 +40,8 @@
 # Custom telescope
     - references shows multiple entries if there are multiple refs on the same line, but since in the preview it highlights the whole line this is not useful. I could either change the highligh to only higligh the word, or filter dublicate lines
     - if show refs make title of prompt say the refs, same for impl, saying the name of the trait when on impl of trait and also when on impl of trait fn
+    - live grep with color and telescope and columns
+    - custom workspace and also perhaps other pickers add ordinal like name + kind + file
 # blue screen of death
  + leader d (on long message) froze (disableing it): might have been solved by exiting when max_width is less than 0
 

@@ -663,15 +663,22 @@ end
 M.cached_work_space_symbols = {}
 M.cached_work_space_symbols_cleaned = {}
 
+
+
 M.get_cached_work_space_symbols_block_info = function(flat_symbols)
     M.cached_work_space_symbols_cleaned = {}
+
+    local lualine = require("lualine")
     -- sort flat symbols by file name
     table.sort(flat_symbols, function(a, b)
         return a.location.uri < b.location.uri
     end)
     local last_file = nil
     local last_bufnr = nil
-    local last_was_open = true 
+    local last_was_open = true
+    local config = lualine.get_config()
+    config.sections.lualine_b = {}
+    lualine.setup(config)
     for i, symbol in ipairs(flat_symbols) do
         local file_name = vim.uri_to_fname(symbol.location.uri)
         file_name = vim.fn.fnamemodify(file_name, ":.")
@@ -695,7 +702,6 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
                 end
                 if vim.fn.bufloaded(bufnr) ~= 1 then
                     last_was_open = false
-                    vim.bo[bufnr].filetype = "nofile"
                     vim.fn.bufload(bufnr)
                 else
                     last_was_open = true
@@ -711,13 +717,16 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
                 last_file = file_name
                 last_bufnr = bufnr
             end
-            if last_bufnr then
-                local custom = get_block_info(lnum, last_bufnr) or ""
-                M.cached_work_space_symbols_cleaned[key] = custom
+            local custom = get_block_info(lnum, last_bufnr) or ""
+            if name == "len" then
+                print("Found len symbol in file: " .. file_name .. " at line: " .. lnum .. " col: " .. col, " custom: ", custom)
             end
+            M.cached_work_space_symbols_cleaned[key] = custom
         end
     end
     M.cached_work_space_symbols = M.cached_work_space_symbols_cleaned
+    config.sections.lualine_b = { 'branch' , 'diff', 'diagnostics' }
+    lualine.setup(config)
 end
 
 M.workspace_dynamic = function()
