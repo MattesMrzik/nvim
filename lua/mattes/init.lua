@@ -10,4 +10,4 @@ require("mattes.diagnostics")
 require("mattes.spell")
 require("mattes.remap")
 require("mattes.lualine")
---require("mattes.noice")
+

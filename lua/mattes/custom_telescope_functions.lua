@@ -1,7 +1,6 @@
 --local telescope = require("telescope")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
-local sorters = require("telescope.sorters")
 local builtin = require("telescope.builtin")
 local fzy = require("telescope.algos.fzy")
 
@@ -341,7 +340,6 @@ end
 
 local function load_buffer_and_treesitter_parse(filename)
     local bufnr = vim.fn.bufnr(filename)
-    local was_open = vim.api.nvim_buf_is_loaded(bufnr)
     if bufnr == -1 then
         -- assigns new buffer number
         bufnr = vim.fn.bufnr(filename, true)
@@ -358,7 +356,7 @@ local function load_buffer_and_treesitter_parse(filename)
         vim.api.nvim_buf_set_option(0, 'statusline', '')
         local parser = vim.treesitter.get_parser(bufnr, "rust")
         if not parser then
-            print("No parser available for language: " .. lang)
+            print("No parser available for language: rust")
             return nil
         end
 
@@ -369,7 +367,7 @@ local function load_buffer_and_treesitter_parse(filename)
         end
         --vim.fn.bufload(bufnr)
     end
-    return bufnr, was_open
+    return bufnr
 end
 
 M._custom_lsp_implementations = function()
@@ -408,7 +406,9 @@ M._custom_lsp_implementations = function()
             local bufnr = load_buffer_and_treesitter_parse(filename)
             local line_number = implementation.targetSelectionRange.start.line
             local column = implementation.targetSelectionRange.start.character
+            print("bufnr: ", bufnr, " line_number: ", line_number, " column: ", column)
             local custom = get_block_info(line_number, bufnr) or ""
+            print("custom: ", custom)
             return {
                 value = implementation,
                 ordinal = filename,
@@ -453,7 +453,7 @@ M._custom_lsp_implementations = function()
     end)
 end
 M.custom_lsp_implementations = function()
-    local Snacks = require("snacks")
+    local Snacks = require("mattes.snacks")
     vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
         if err or not implementations then
             vim.notify("No implementations found", vim.log.levels.INFO)
@@ -515,12 +515,13 @@ M.custom_workspace_symbols = function()
             return
         end
         if not symbols or vim.tbl_isempty(symbols) then
-            print("No symbols found")
+            vim.notify("No symbols found, perhaps lsp is still booting.", vim.log.levels.INFO)
             return
         end
         local flat_symbols= {}
         flatten(symbols, flat_symbols)
 
+        -- TODO this able this when running on not rust
         M.get_cached_work_space_symbols_block_info(flat_symbols)
         --print(vim.inspect(M.cached_work_space_symbols_cleaned))
         local first_col_width = 40
@@ -663,11 +664,11 @@ end
 M.cached_work_space_symbols = {}
 M.cached_work_space_symbols_cleaned = {}
 
-
-
 M.get_cached_work_space_symbols_block_info = function(flat_symbols)
+    if next(M.cached_work_space_symbols) == nil then
+        vim.notify("No cached workspace symbols found, generating new ones.", vim.log.levels.INFO)
+    end
     M.cached_work_space_symbols_cleaned = {}
-
     local lualine = require("lualine")
     -- sort flat symbols by file name
     table.sort(flat_symbols, function(a, b)
@@ -718,9 +719,6 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
                 last_bufnr = bufnr
             end
             local custom = get_block_info(lnum, last_bufnr) or ""
-            if name == "len" then
-                print("Found len symbol in file: " .. file_name .. " at line: " .. lnum .. " col: " .. col, " custom: ", custom)
-            end
             M.cached_work_space_symbols_cleaned[key] = custom
         end
     end
@@ -822,4 +820,5 @@ M.workspace_dynamic = function()
         sorter = sorter,
     })
 end
+
 return M
