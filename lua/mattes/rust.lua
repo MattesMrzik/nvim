@@ -1,44 +1,50 @@
-require'lspconfig'.rust_analyzer.setup {
-    cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
-    settings = {
-        ['rust-analyzer'] = {
-            semanticHighlighting = false,
-            check = {
-                command = "clippy";
-            },
-            diagnostics = {
-                enable = true;
-            },
-            workspace = {
-                symbol = {
-                    search = {
-                        limit = 10000,
+local function setup_rust_lst(feature)
+    require'lspconfig'.rust_analyzer.setup {
+        cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
+        settings = {
+            ['rust-analyzer'] = {
+                semanticHighlighting = false,
+                check = {
+                    command = "clippy";
+                },
+                cargo = {
+                    features = {feature or ""},
+                },
+                diagnostics = {
+                    enable = true;
+                },
+                workspace = {
+                    symbol = {
+                        search = {
+                            limit = 10000,
+                        },
                     },
                 },
-            },
-        }
-    },
-    --handelrs = {["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded"})},
-    -- since the lsp takes some time to startup, calling the inlay_hint immediately has no effect
-    -- so the call is delayed
-    on_attach = function(client, bufnr)
-        vim.defer_fn(function()
-            local ft = vim.bo[bufnr].filetype
-            if not ft:match("^Diffview") then
-                vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-            end
-            --local hover = vim.lsp.buf.hover
-            -----@diagnostic disable-next-line: duplicate-set-field
-            --vim.lsp.buf.hover = function()
-            --    return hover({
-            --        max_width = 100,
-            --        max_height = 14,
-            --        border = utils.border,
-            --   })
-            --end
-        end, 4000)
-    end,
-}
+            }
+        },
+        --handelrs = {["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded"})},
+        -- since the lsp takes some time to startup, calling the inlay_hint immediately has no effect
+        -- so the call is delayed
+        on_attach = function(client, bufnr)
+            vim.defer_fn(function()
+                local ft = vim.bo[bufnr].filetype
+                if not ft:match("^Diffview") then
+                    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                end
+                --local hover = vim.lsp.buf.hover
+                -----@diagnostic disable-next-line: duplicate-set-field
+                --vim.lsp.buf.hover = function()
+                --    return hover({
+                --        max_width = 100,
+                --        max_height = 14,
+                --        border = utils.border,
+                --   })
+                --end
+            end, 4000)
+        end,
+    }
+end
+setup_rust_lst()
 
 -- enables cargo fmt on save, i think this might be less efficient than rust fmt since 
 -- cargo does every file (i think) and not only the changed ones, but (i think) cargo fmt produces better formats
@@ -163,11 +169,16 @@ cmp.setup({
 local ts_utils = require("nvim-treesitter.ts_utils")
 local M = {}
 
+M.last_feature = ""
+function M.setup_rust_lst(feature)
+    setup_rust_lst(feature)
+end
+
 function M.jump_to_trait()
-    local node = ts_utils.get_node_at_cursor()
-    local fn_name = nil
 
     -- Step 1: Find function_item and extract function name
+    local node = ts_utils.get_node_at_cursor()
+    local fn_name = nil
     local search_node = node
     while search_node do
         if search_node:type() == "function_item" then
@@ -246,10 +257,11 @@ function M.jump_to_trait()
 
                         -- Step 3: search for function with matching name
                         for sig in body:iter_children() do
-                            if sig:type() == "function_signature_item" then
+                            if sig:type() == "function_signature_item" or sig:type() == "function_item" then
                                 for subnode in sig:iter_children() do
                                     if subnode:type() == "identifier" then
                                         local text = vim.treesitter.get_node_text(subnode, bufnr)
+                                        print("text = ", text)
                                         if text == fn_name then
                                             local srow, scol = subnode:range()
                                             vim.api.nvim_set_current_buf(bufnr)

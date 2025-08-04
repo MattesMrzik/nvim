@@ -17,11 +17,11 @@ vim.keymap.set("n", "<leader>fa", function()
     Snacks.picker.grep({
         layout = {
             layout = {
-                width = 0.999,
+                width = 0.8,
                 height = 0.3,
                 box = "horizontal",
                 position = "float",
-                col = 0,
+                col = vim.api.nvim_win_get_width(0)*(1-0.8)/2,
                 row = 0,
             },
         }
@@ -60,12 +60,31 @@ vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
 vim.keymap.set("n", "<leader>gs", vim.cmd.Git);
 
 -- lsp
-vim.keymap.set("n", "<leader>gt", require("mattes.rust").jump_to_trait, { desc = "Go to trait definition from impl" })
+local lspM = require("mattes.rust")
+vim.keymap.set("n", "<leader>gt", lspM.jump_to_trait, { desc = "Go to trait definition from impl" })
 --vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
 vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
 vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 vim.keymap.set("n", "K", function() vim.lsp.buf.hover({border = "rounded"}) end, { desc = "LSP Hover" })
+vim.keymap.set("n", "<leader>cf", function()
+    local features = {
+        "",
+        "par-regraft",
+        "par-regraft-chunk",
+        "par-regraft-manual",
+        "deterministic",
+    }
+    vim.ui.select(features, {
+        prompt = "Current selected feature is '" .. lspM.last_feature .. "', select to change)",
+    }, function(choice)
+        if choice then
+            vim.notify("Setting up rust lsp with feature ".. choice)
+            lspM.last_feature = choice
+            lspM.setup_rust_lst(choice)
+        end
+    end)
+end)
 
 -- cmp
 -- see rust.lua

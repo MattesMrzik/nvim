@@ -9,6 +9,8 @@
     - after renaming a var, call save all buffers
     - popup for grep and :command -> dont anchor at zz but sligly above or below the cursor:
     - does spell check strings?
+    - popup rename under cursor
+    - search and replace across all files
 
 # movement and selection 
     - jump to next fn or impl or struct def
@@ -42,6 +44,7 @@
     - if show refs make title of prompt say the refs, same for impl, saying the name of the trait when on impl of trait and also when on impl of trait fn
     - live grep with color and telescope and columns
     - custom workspace and also perhaps other pickers add ordinal like name + kind + file
+    - dont run the get block info when in non rust file
 # blue screen of death
  + leader d (on long message) froze (disableing it): might have been solved by exiting when max_width is less than 0
 
