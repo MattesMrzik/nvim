@@ -77,11 +77,6 @@ return require('packer').startup(function(use)
             { "github/copilot.vim" }, -- or 'zbirenbaum/copilot.lua'
             { "nvim-lua/plenary.nvim", branch = "master" },
         },
-        config = function()
-            require("CopilotChat").setup({
-                copilot_model = "gpt-4o-copilot",
-            })
-        end
     }
 
     --use {'nvim-telescope/telescope-ui-select.nvim' }
@@ -110,6 +105,11 @@ return require('packer').startup(function(use)
             require('Comment').setup()
         end
     }
+
+    use { 'dyng/ctrlsf.vim' }
+
+    use {"lervag/vimtex" }
+
 end)
 
 

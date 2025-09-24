@@ -236,9 +236,16 @@ M.custom_lsp_document_symbols = function()
 end
 
 local function filter_function_defs_from_references(references)
+    local current_filename = vim.api.nvim_buf_get_name(0)
+    local current_pos = vim.api.nvim_win_get_cursor(0)
     local filtered_references = vim.tbl_filter(function(reference)
         local filename = vim.uri_to_fname(reference.uri)
         local lnum = reference.range.start.line
+        if filename == current_filename then
+            if current_pos[1] == lnum + 1 then
+                return false
+            end
+        end
         local col = reference.range.start.character
         local bufnr = vim.fn.bufnr(filename)
         if bufnr == -1 then
@@ -255,7 +262,12 @@ local function filter_function_defs_from_references(references)
                 return nil
             end
         end
+
         local node = vim.treesitter.get_node({bufnr = bufnr, pos = {lnum,col} })
+        if node == nil then
+            vim.notify("No node found at position: " .. lnum .. ":" .. col .. " in file: " .. filename, vim.log.levels.WARN)
+            return false
+        end
         if node:parent():type() =="function_item" then
             return false
         else

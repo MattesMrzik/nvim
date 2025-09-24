@@ -51,3 +51,6 @@ nvim-treesitter/playground
 
 
 brew install fd
+
+what was the plugin or setting that makes the same words as under the cursor highlighted?
+

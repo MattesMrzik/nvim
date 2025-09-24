@@ -8,6 +8,22 @@ vim.keymap.set("n", "<C-j>", "<C-e>", { noremap = true, desc = "Scroll view down
 vim.keymap.set("n", "<C-k>", "<C-y>", { noremap = true, desc = "Scroll view up" })
 vim.keymap.set("n", "*", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true }) -- highlight without jumping
 vim.keymap.set("n", "#", [[:let @/='\<<C-R><C-W>\>'<CR>:set hlsearch<CR>]], { noremap = true, silent = true })
+vim.keymap.set("n", "=", [[<cmd>vertical resize +5<cr>]]) -- make the window biger vertically
+vim.keymap.set("n", "+", [[<cmd>vertical resize -5<cr>]]) -- make the window smaller vertically
+vim.keymap.set("n", "-", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger horizontally by pressing shift and =
+vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally by pressing shift and -
+vim.keymap.set("n", "<leader>gf", function()
+  local text = vim.fn.expand("<cfile>")
+  print(text)
+  local file, line = text:match("([^:]+):(%d+)")
+  print("File: " .. file .. ", Line: " .. line)
+  if file and line then
+    vim.cmd("edit " .. file)
+    vim.cmd(line)
+  else
+    print("No valid file:line under cursor")
+  end
+end, { desc = "Go to file:line under cursor" })
 
 -- snacks
 vim.keymap.set("n", "<leader>ch", function() Snacks.picker.command_history({ layout = { preset = "dropdown", preview = false } }) end, { desc = "Snacks command history picker" })
@@ -29,6 +45,7 @@ vim.keymap.set("n", "<leader>fa", function()
 ) end)
 vim.keymap.set("n", "<leader>fb", function() Snacks.picker.buffers() end)
 vim.keymap.set("n", "<leader>fn", function() Snacks.picker.notifications() end)
+vim.keymap.set("n", "<leader>sn", function() Snacks.picker.snippets() end, { desc = "Snacks snippets picker" })
 
 -- copilot
 vim.keymap.set("n", "<leader>cp", function() require("CopilotChat").toggle() end, { desc = "Toggle Copilot Chat" })
@@ -149,6 +166,7 @@ vim.keymap.set("n", "<leader>k", function()
         require("telescope.builtin").lsp_references()
     end
 end, {desc = "Search references"})
+-- // make this call the normal snacks picker if not in rust project (rust lsp)
 vim.keymap.set("n", "<leader>ws", function() cs.custom_workspace_symbols() end, {desc =  "custom Workspace symbols"})
 
 vim.keymap.set("n", "<leader>pp", function() cs.workspace_2() end, { desc = "Telescope dynamic workspace symbols" })

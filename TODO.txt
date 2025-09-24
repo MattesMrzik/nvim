@@ -11,6 +11,8 @@
     - does spell check strings?
     - popup rename under cursor
     - search and replace across all files
+    - keep cursor at location even if paste something
+    - renaming a var removes the mut keyword
 
 # movement and selection 
     - jump to next fn or impl or struct def
@@ -49,6 +51,8 @@
  + leader d (on long message) froze (disableing it): might have been solved by exiting when max_width is less than 0
 
 
+# diffview
+    - inlay hints dont seem to be disabled in conflict diff view, does it get disabled in non conflict diff view?
 
 # colors
     - trait and typeparameter seem to have the same color in telescope
