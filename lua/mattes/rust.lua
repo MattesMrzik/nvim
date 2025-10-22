@@ -51,10 +51,18 @@ setup_rust_lst()
 vim.api.nvim_create_autocmd("BufWritePost", {
   pattern = "*.rs",
   callback = function()
-    vim.cmd("silent !cargo fmt")
-  end,
+    local view = vim.fn.winsaveview()
+    local output = vim.fn.systemlist("cargo fmt")
+    if vim.v.shell_error ~= 0 then
+      vim.notify("cargo fmt failed:\n" .. table.concat(output, "\n"), vim.log.levels.ERROR)
+    else
+      -- Reload buffer so Neovim sees the updated file
+      vim.cmd("edit")
+      vim.notify("cargo fmt succeeded", vim.log.levels.INFO)
+      vim.fn.winrestview(view)
+    end
+  end
 })
-
 -- shows deduced variable types as hint
 vim.lsp.inlay_hint.enable(true)
 
