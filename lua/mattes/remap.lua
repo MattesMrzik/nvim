@@ -79,7 +79,6 @@ vim.keymap.set("n", "<leader>gs", vim.cmd.Git);
 -- lsp
 local lspM = require("mattes.rust")
 vim.keymap.set("n", "<leader>gt", lspM.jump_to_trait, { desc = "Go to trait definition from impl" })
---vim.keymap.set('n', '<leader>im', require('telescope.builtin').lsp_implementations, { desc = 'LSP Implementations' })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
 vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
 vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
@@ -140,10 +139,11 @@ vim.keymap.set("n", "<leader>ss", function()
     require("telescope.builtin").lsp_document_symbols()
   end
 end, { desc = "Search symbols in current file" })
+-- this is just the same as >im, because i sometime mistype it
 vim.keymap.set("n", "<leader>in", function()
     local fname = vim.api.nvim_buf_get_name(0)
     if fname:sub(-3) == ".rs" then
-        cs._custom_lsp_implementations()
+        cs.custom_lsp_implementations()
     else
         require("telescope.builtin").lsp_implementations()
     end
@@ -168,9 +168,7 @@ vim.keymap.set("n", "<leader>k", function()
 end, {desc = "Search references"})
 -- // make this call the normal snacks picker if not in rust project (rust lsp)
 vim.keymap.set("n", "<leader>ws", function() cs.custom_workspace_symbols() end, {desc =  "custom Workspace symbols"})
-
 vim.keymap.set("n", "<leader>pp", function() cs.workspace_2() end, { desc = "Telescope dynamic workspace symbols" })
-
 
 -- DiffView
 vim.keymap.set("n", "<leader>jj", require("mattes.diffview").toggle_diff_view, { desc = "Toggles diffview"})

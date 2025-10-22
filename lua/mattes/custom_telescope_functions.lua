@@ -172,6 +172,25 @@ local function sub_fzy(start, end_col)
     end
 end
 
+local function shorten_custom(text, max_length)
+    if #text <= max_length then
+        return text
+    else
+        local result = text:gsub("<(.-)>", function(inner)
+            if #inner > 9 then
+                return ""
+            else
+                return "<" .. inner .. ">"
+            end
+        end)
+        if #result > max_length then
+            return result:sub(1, max_length - 3) .. "..."
+        else
+            return result
+        end
+    end
+end
+
 M.custom_lsp_document_symbols = function()
     vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, ctx, _)
         if err or not symbols then return end
@@ -188,6 +207,7 @@ M.custom_lsp_document_symbols = function()
             local hl = kind_highlights[kind] or ""
             local detail = symbol.detail or ""
             local custom = get_block_info(symbol.range.start.line+1, 0) or ""
+            local result = shorten_custom(custom, 50)
             return {
                 value = symbol,
                 ordinal = symbol.name .. " " .. kind,
@@ -196,7 +216,7 @@ M.custom_lsp_document_symbols = function()
                         {
                             {icon, return_hl_as_fn(hl), 3},
                             {symbol.name, return_hl_as_fn(hl), 30},
-                            {custom, highlight_code("rust"), 30},
+                            {result, highlight_code("rust"), 50},
                         }
                     )
                     return highlighted_text, highlights
@@ -356,33 +376,30 @@ local function load_buffer_and_treesitter_parse(filename)
         -- assigns new buffer number
         bufnr = vim.fn.bufnr(filename, true)
     end
-    if not vim.fn.bufloaded(bufnr) then
+
+    if vim.fn.bufloaded(bufnr) == 0 then
         vim.api.nvim_buf_set_var(bufnr, 'gitsigns_disable', true)
         vim.b[bufnr].gitsigns_disable = true
         vim.bo[bufnr].filetype = "nofile"
-        print("Loading buffer: " .. filename)
-
         vim.fn.bufload(bufnr)
+    end
 
-        require("gitsigns").detach(bufnr)
-        vim.api.nvim_buf_set_option(0, 'statusline', '')
-        local parser = vim.treesitter.get_parser(bufnr, "rust")
-        if not parser then
-            print("No parser available for language: rust")
-            return nil
-        end
+    require("gitsigns").detach(bufnr)
+    local parser = vim.treesitter.get_parser(bufnr, "rust")
+    if not parser then
+        print("No parser available for language: rust")
+        return nil
+    end
 
-        local tree = parser:parse()[1]
-        if not tree then
-            print("Failed to parse buffer")
-            return nil
-        end
-        --vim.fn.bufload(bufnr)
+    local tree = parser:parse()[1]
+    if not tree then
+        print("Failed to parse buffer")
+        return nil
     end
     return bufnr
 end
 
-M._custom_lsp_implementations = function()
+M.custom_lsp_implementations = function()
     vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
         if err or not implementations then
             vim.notify("No implementations found", vim.log.levels.INFO)
@@ -403,13 +420,13 @@ M._custom_lsp_implementations = function()
             return
         end
 
-        local displayer = entry_display.create({
-            separator = " ",
-            items = {
-                { width = 30 },
-                { remaining = true },
-            },
-        })
+        -- local displayer = entry_display.create({
+        --     separator = " ",
+        --     items = {
+        --         { width = 30 },
+        --         { remaining = true },
+        --     },
+        -- })
 
         local function make_entry(implementation)
             local filename = vim.uri_to_fname(implementation.targetUri)
@@ -418,17 +435,19 @@ M._custom_lsp_implementations = function()
             local bufnr = load_buffer_and_treesitter_parse(filename)
             local line_number = implementation.targetSelectionRange.start.line
             local column = implementation.targetSelectionRange.start.character
-            print("bufnr: ", bufnr, " line_number: ", line_number, " column: ", column)
             local custom = get_block_info(line_number, bufnr) or ""
-            print("custom: ", custom)
+            local result = shorten_custom(custom, 50)
             return {
                 value = implementation,
                 ordinal = filename,
                 display = function()
-                    return displayer({
-                        filename,
-                        {custom, "TelescopeMyHint"},
-                    })
+                local highlighted_text, highlights = get_highlights(
+                        {
+                            {filename, return_hl_as_fn("oldWhite"), 30},
+                            {result, highlight_code("rust"), 50},
+                        }
+                    )
+                    return highlighted_text, highlights
                 end,
                 filename = filename,
                 lnum = line_number + 1,
@@ -464,7 +483,7 @@ M._custom_lsp_implementations = function()
         }):find()
     end)
 end
-M.custom_lsp_implementations = function()
+M.custom_lsp_implementations_not_working = function()
     local Snacks = require("mattes.snacks")
     vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
         if err or not implementations then
@@ -536,7 +555,7 @@ M.custom_workspace_symbols = function()
         -- TODO this able this when running on not rust
         M.get_cached_work_space_symbols_block_info(flat_symbols)
         --print(vim.inspect(M.cached_work_space_symbols_cleaned))
-        local first_col_width = 40
+        local first_col_width = 20
         local second_col_width = 30
 
         local function make_entry(symbol)
@@ -554,6 +573,7 @@ M.custom_workspace_symbols = function()
 
             local key = filename .. ":" .. lnum .. ":" .. col .. ":" .. name
             local custom = M.cached_work_space_symbols[key]
+            local result = shorten_custom(custom or "", 50)
 
             return {
                 value = symbol,
@@ -563,7 +583,7 @@ M.custom_workspace_symbols = function()
                         {filename, return_hl_as_fn("oldWhite"), first_col_width},
                         {name, return_hl_as_fn("oldWhite"), second_col_width},
                         {kind, return_hl_as_fn(hl), 10},
-                        {custom, highlight_code("rust"), 30},
+                        {result, highlight_code("rust"), 50},
                     })
                     return t, h
                 end,
