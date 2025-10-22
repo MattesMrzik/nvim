@@ -13,6 +13,7 @@
     - search and replace across all files
     - keep cursor at location even if paste something
     - renaming a var removes the mut keyword
+    - when deleting sometimes there is an error when selecting with mouse up and to the beginning if line and then pressing x, treesitter highlihgter or similar, either fix or make error a popup
 
 # movement and selection 
     - jump to next fn or impl or struct def
@@ -33,20 +34,26 @@
 # snacks
     - grep
     - cliphist :lua Snacks.picker.cliphist(opts?)
+
 # diagonstics
     make write on a file update diagnostics for every buffer
+
 # GREP leader>fs
     - make columns
     - highligh hit in one color, additionaly typing in another color
     - donst search the filename
     - leader gr for grep with regrex
     - is only one hit that goto it
+
 # Custom telescope
     - references shows multiple entries if there are multiple refs on the same line, but since in the preview it highlights the whole line this is not useful. I could either change the highligh to only higligh the word, or filter dublicate lines
     - if show refs make title of prompt say the refs, same for impl, saying the name of the trait when on impl of trait and also when on impl of trait fn
     - live grep with color and telescope and columns
     - custom workspace and also perhaps other pickers add ordinal like name + kind + file
     - dont run the get block info when in non rust file
+    - leader ws >  pbuild shows wierd comment as block info
+
+
 # blue screen of death
  + leader d (on long message) froze (disableing it): might have been solved by exiting when max_width is less than 0
 

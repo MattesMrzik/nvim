@@ -11,4 +11,4 @@ require("mattes.spell")
 require("mattes.remap")
 require("mattes.lualine")
 require("mattes.copilot")
-
+require("mattes.lua_lsp")

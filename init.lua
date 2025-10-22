@@ -18,8 +18,8 @@ vim.o.signcolumn = "yes:2"
 --vim.g._ts_force_sync_parsing = true
 
 -- lsp
--- rust lsp in in separate rust.lua file
-require'lspconfig'.lua_ls.setup{}
+-- rust lsp in separate rust.lua file
+-- lua lsp in lua_lsp.lua file
 -- python lsp
 require"lspconfig".pyright.setup({
     on_attach = function(client, bufnr)

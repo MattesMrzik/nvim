@@ -13,3 +13,5 @@ require("telescope").setup({
         },
     },
   })
+-- show line numbers in previewer
+vim.cmd([[autocmd User TelescopePreviewerLoaded setlocal number]])
