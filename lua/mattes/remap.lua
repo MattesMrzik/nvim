@@ -46,6 +46,7 @@ vim.keymap.set("n", "<leader>fa", function()
 vim.keymap.set("n", "<leader>fb", function() Snacks.picker.buffers() end)
 vim.keymap.set("n", "<leader>fn", function() Snacks.picker.notifications() end)
 vim.keymap.set("n", "<leader>sn", function() Snacks.picker.snippets() end, { desc = "Snacks snippets picker" })
+vim.keymap.set("n", "<leader>ww", function() Snacks.picker.diagnostics() end, { desc = "Toggles and focuses trouble window"})
 
 -- copilot
 vim.keymap.set("n", "<leader>cp", function() require("CopilotChat").toggle() end, { desc = "Toggle Copilot Chat" })
@@ -68,7 +69,6 @@ vim.keymap.set('n', ']d', function() vim.diagnostic.goto_next({ float = false })
 vim.keymap.set('n', '[d', function() vim.diagnostic.goto_prev({ float = false }) end)
 
 -- trouble
-vim.keymap.set("n", "<leader>ww", function() Snacks.picker.diagnostics() end, { desc = "Toggles and focuses trouble window"})
 
 -- undo tree
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)

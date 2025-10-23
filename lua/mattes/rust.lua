@@ -58,7 +58,6 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     else
       -- Reload buffer so Neovim sees the updated file
       vim.cmd("edit")
-      vim.notify("cargo fmt succeeded", vim.log.levels.INFO)
       vim.fn.winrestview(view)
     end
   end
