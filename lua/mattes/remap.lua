@@ -65,8 +65,8 @@ vim.keymap.set("n", "<leader>ct", function()
 end, { desc = "Toggle Copilot", silent = true })
 
 -- diagnostics
-vim.keymap.set('n', ']d', function() vim.diagnostic.goto_next({ float = false }) end)
-vim.keymap.set('n', '[d', function() vim.diagnostic.goto_prev({ float = false }) end)
+vim.keymap.set('n', ']d', function() vim.diagnostic.jump({count = 1, float = false}) end)
+vim.keymap.set('n', '[d', function() vim.diagnostic.jump({count = -1, float = false}) end)
 
 -- trouble
 
@@ -83,6 +83,7 @@ vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Ac
 vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end, {desc = "toggle inlay_hints"})
 vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 vim.keymap.set("n", "K", function() vim.lsp.buf.hover({border = "rounded"}) end, { desc = "LSP Hover" })
+-- this might cause to give a different namespace to the diagnostics, so that snacks does not see the diagnostics
 vim.keymap.set("n", "<leader>cf", function()
     local features = {
         "",
@@ -97,7 +98,7 @@ vim.keymap.set("n", "<leader>cf", function()
         if choice then
             vim.notify("Setting up rust lsp with feature ".. choice)
             lspM.last_feature = choice
-            lspM.setup_rust_lst(choice)
+            lspM.setup_rust_lsp(choice)
         end
     end)
 end)

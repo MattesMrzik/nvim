@@ -1,65 +1,47 @@
-local function setup_rust_lst(feature)
-    require'lspconfig'.rust_analyzer.setup {
-        cmd = {"/Users/mrzi/.cargo/bin/rust-analyzer"},
-        settings = {
-            ['rust-analyzer'] = {
-                semanticHighlighting = false,
-                check = {
-                    command = "clippy";
-                },
-                cargo = {
-                    features = {feature or ""},
-                },
-                diagnostics = {
-                    enable = true;
-                },
-                workspace = {
-                    symbol = {
-                        search = {
-                            limit = 10000,
-                        },
-                    },
-                },
-            }
+local function setup_rust_lsp(feature)
+  vim.lsp.config("rust_analyzer", {
+    cmd = { "/Users/mrzi/.cargo/bin/rust-analyzer" },
+    settings = {
+      ["rust-analyzer"] = {
+        semanticHighlighting = false,
+        check = { command = "clippy" },
+        cargo = { features = { feature or "" } },
+        diagnostics = { enable = true },
+        workspace = {
+          symbol = { search = { limit = 10000 } },
         },
-        --handelrs = {["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded"})},
-        -- since the lsp takes some time to startup, calling the inlay_hint immediately has no effect
-        -- so the call is delayed
-        on_attach = function(client, bufnr)
-            vim.defer_fn(function()
-                local ft = vim.bo[bufnr].filetype
-                if not ft:match("^Diffview") then
-                    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-                end
-                --local hover = vim.lsp.buf.hover
-                -----@diagnostic disable-next-line: duplicate-set-field
-                --vim.lsp.buf.hover = function()
-                --    return hover({
-                --        max_width = 100,
-                --        max_height = 14,
-                --        border = utils.border,
-                --   })
-                --end
-            end, 4000)
-        end,
-    }
+      },
+    },
+    on_attach = function(_, bufnr) -- first param is the client, which we don't use
+      -- Delay inlay hints to allow LSP to initialize
+      vim.defer_fn(function()
+        local ft = vim.bo[bufnr].filetype
+        if not ft:match("^Diffview") then
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end
+
+        -- Optional hover customization (commented out)
+        -- local hover = vim.lsp.buf.hover
+        -- vim.lsp.buf.hover = function()
+        --   return hover({ max_width = 100, max_height = 14, border = utils.border })
+        -- end
+      end, 4000)
+    end,
+  })
+
+  -- Enable the server for its filetypes
+  vim.lsp.enable("rust_analyzer")
 end
-setup_rust_lst()
+
+setup_rust_lsp()
+
 
 -- enables cargo fmt on save, i think this might be less efficient than rust fmt since 
 -- cargo does every file (i think) and not only the changed ones, but (i think) cargo fmt produces better formats
 vim.api.nvim_create_autocmd("BufWritePost", {
   pattern = "*.rs",
   callback = function()
-    local view = vim.fn.winsaveview()
-    local output = vim.fn.systemlist("cargo fmt")
-    if vim.v.shell_error ~= 0 then
-      vim.notify("cargo fmt failed:\n" .. table.concat(output, "\n"), vim.log.levels.ERROR)
-    else
-      -- Reload buffer so Neovim sees the updated file
-      vim.cmd("edit")
-      vim.fn.winrestview(view)
-    end
+    vim.lsp.buf.format()
   end
 })
 -- shows deduced variable types as hint
@@ -81,7 +63,7 @@ local compare_kinds = function(kind, reverse)
     end
 end
 
-local modify_text_edit = function(entry, ctx)
+local modify_text_edit = function(entry, _) -- second param was called ctx
     local item = entry:get_completion_item()
     if item.textEdit and item.textEdit.range then
         local range = item.textEdit.range
@@ -177,8 +159,8 @@ local ts_utils = require("nvim-treesitter.ts_utils")
 local M = {}
 
 M.last_feature = ""
-function M.setup_rust_lst(feature)
-    setup_rust_lst(feature)
+function M.setup_rust_lsp(feature)
+    setup_rust_lsp(feature)
 end
 
 function M.jump_to_trait()
@@ -223,12 +205,16 @@ function M.jump_to_trait()
                         result = result[1]
                         local filename = vim.uri_to_fname(result.targetUri)
                         local lnum = result.targetSelectionRange.start.line
-                        local col = result.targetSelectionRange.start.character
+                        -- local col = result.targetSelectionRange.start.character
                         local bufnr = vim.fn.bufnr(filename)
                         if bufnr == -1 then bufnr = vim.fn.bufnr(filename, true) end
                         if vim.fn.bufloaded(bufnr) ~= 1 then vim.fn.bufload(bufnr) end
 
                         local parser = vim.treesitter.get_parser(bufnr, "rust")
+                        if parser == nil then
+                            print("No parser found for buffer:", bufnr)
+                            return
+                        end
                         local tree = parser:parse()[1]
                         if not tree then return end
 

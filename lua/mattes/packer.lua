@@ -57,13 +57,13 @@ return require('packer').startup(function(use)
             require('gitsigns').setup()
         end
     }
-    use {
-        "folke/trouble.nvim",
-        cmd = { "Trouble" },
-        config = function()
-            require("trouble").setup({})
-        end,
-    }
+    -- use {
+    --     "folke/trouble.nvim",
+    --     cmd = { "Trouble" },
+    --     config = function()
+    --         require("trouble").setup({})
+    --     end,
+    -- }
     use("sindrets/diffview.nvim")
 
     -- is a optional requirement for diffview.

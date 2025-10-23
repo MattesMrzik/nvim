@@ -74,8 +74,8 @@ end
 -- this is the same as debugging version of the true function below
 function M.diagnostics_debug()
     diagnostics_type = (diagnostics_type + 1) % 2
-    local virtual_lines_enabled = false
-    local virtual_text_enabled = false
+    -- local virtual_lines_enabled = false
+    -- local virtual_text_enabled = false
     if diagnostics_type == 1 then
         vim.diagnostic.config({
             --virtual_text = virtual_text_enabled, -- optional: hide virtual_text when lines are on
@@ -89,7 +89,7 @@ function M.diagnostics_debug()
                 end,
             }
         })
-    else 
+    else
         vim.diagnostic.config({virtual_lines = false})
     end
 end
