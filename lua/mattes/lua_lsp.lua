@@ -7,7 +7,7 @@ vim.lsp.config("lua_ls", {
         library = { vim.env.VIMRUNTIME },
       },
       diagnostics = {
-        globals = { "vim" },  -- <- must be here
+        globals = { "vim", "Snacks" },
       },
     },
   },

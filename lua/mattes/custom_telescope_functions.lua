@@ -88,7 +88,7 @@ local function get_block_info(line, bufnr)
         if while_count > 10 then
             break
         end
-        local start_row, start_col, end_row, end_col = vim.treesitter.get_node_range(node)
+        local start_row, _, _, _ = vim.treesitter.get_node_range(node) -- start_col, end_row, end_col
         local lines = vim.api.nvim_buf_get_lines(bufnr, start_row-1, start_row + 10, false)
         for i, l in pairs(lines) do
             if i > 10 then
@@ -192,7 +192,7 @@ local function shorten_custom(text, max_length)
 end
 
 M.custom_lsp_document_symbols = function()
-    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, ctx, _)
+    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, _, _) -- third arg is ctx
         if err or not symbols then return end
 
         local flat_symbols = {}
@@ -205,7 +205,7 @@ M.custom_lsp_document_symbols = function()
             end
             local icon = kind_icons[kind] or ""
             local hl = kind_highlights[kind] or ""
-            local detail = symbol.detail or ""
+            -- local detail = symbol.detail or ""
             local custom = get_block_info(symbol.range.start.line+1, 0) or ""
             local result = shorten_custom(custom, 50)
             return {
@@ -277,9 +277,12 @@ local function filter_function_defs_from_references(references)
             -- buffer with bufnr is not loaded -> load
             vim.fn.bufload(bufnr)
             local parser = vim.treesitter.get_parser(bufnr, "rust")
+            if not parser then
+                return false
+            end
             local tree = parser:parse()[1]
             if not tree then
-                return nil
+                return false
             end
         end
 
@@ -299,8 +302,8 @@ end
 
 M.custom_lsp_references = function()
     local params = vim.lsp.util.make_position_params(nil, "utf-16")
-    params.context = { includeDeclaration = false}
-    vim.lsp.buf_request(0, "textDocument/references", params, function(err, references, ctx, _)
+    -- params.context = { includeDeclaration = false} -- i think there is no field context
+    vim.lsp.buf_request(0, "textDocument/references", params, function(err, references, _, _) -- third arg is ctx
         if err or not references or vim.tbl_isempty(references) then
             print(err)
             vim.notify("No references found", vim.log.levels.INFO)
@@ -384,7 +387,7 @@ local function load_buffer_and_treesitter_parse(filename)
         vim.fn.bufload(bufnr)
     end
 
-    require("gitsigns").detach(bufnr)
+    require("lua.mattes.gitsigns").detach(bufnr)
     local parser = vim.treesitter.get_parser(bufnr, "rust")
     if not parser then
         print("No parser available for language: rust")
@@ -400,7 +403,7 @@ local function load_buffer_and_treesitter_parse(filename)
 end
 
 M.custom_lsp_implementations = function()
-    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
+    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, _, _) -- third arg is ctx
         if err or not implementations then
             vim.notify("No implementations found", vim.log.levels.INFO)
             return
@@ -485,7 +488,7 @@ M.custom_lsp_implementations = function()
 end
 M.custom_lsp_implementations_not_working = function()
     local Snacks = require("mattes.snacks")
-    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, ctx, _)
+    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, _, _) -- third arg is ctx
         if err or not implementations then
             vim.notify("No implementations found", vim.log.levels.INFO)
             return
@@ -540,7 +543,7 @@ M.custom_lsp_implementations_not_working = function()
     end)
 end
 M.custom_workspace_symbols = function()
-    vim.lsp.buf_request(0, "workspace/symbol", {query = "", searchKind = "allSymbols"}, function(err, symbols, ctx, _)
+    vim.lsp.buf_request(0, "workspace/symbol", {query = "", searchKind = "allSymbols"}, function(err, symbols, _, _) -- third arg is ctx
         if err then
             print("LSP error:", vim.inspect(err))
             return
@@ -606,7 +609,7 @@ M.custom_workspace_symbols = function()
                 entry_maker = make_entry,
             }),
             previewer = conf.qflist_previewer({}),
-            sorter = sorter, 
+            sorter = sorter,
             layout_config = {
                 horizontal = { preview_width = 0.4},
                 height = style.height,
@@ -659,7 +662,7 @@ M.two_column_grep_string = function(opts)
         }
     end
     local sorter = conf.generic_sorter({})
-    sorter.highlighter = function (a,b,c)
+    sorter.highlighter = function (_,b,c)
         local positions = fzy.positions(b, c:sub(0, 40))
         -- highlight the grep prompt in the string
         if opts.search and #opts.search > 0 then
@@ -712,7 +715,7 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
     local config = lualine.get_config()
     config.sections.lualine_b = {}
     lualine.setup(config)
-    for i, symbol in ipairs(flat_symbols) do
+    for _, symbol in ipairs(flat_symbols) do
         local file_name = vim.uri_to_fname(symbol.location.uri)
         file_name = vim.fn.fnamemodify(file_name, ":.")
         local lnum = symbol.location.range.start.line
@@ -742,6 +745,7 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
                 local parser = vim.treesitter.get_parser(bufnr, "rust")
                 if not parser then
                     print("No parser available for language: rust")
+                    goto continue
                 end
                 local tree = parser:parse()[1]
                 if not tree then
@@ -753,6 +757,7 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
             local custom = get_block_info(lnum, last_bufnr) or ""
             M.cached_work_space_symbols_cleaned[key] = custom
         end
+        ::continue::
     end
     M.cached_work_space_symbols = M.cached_work_space_symbols_cleaned
     config.sections.lualine_b = { 'branch' , 'diff', 'diagnostics' }
