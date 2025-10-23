@@ -28,12 +28,12 @@ require('kanagawa').setup({
         local theme = colors.theme
         return {
             TelescopeTitle = { fg = theme.ui.special, bold = true },
-            TelescopePromptNormal = { bg = NONE},
-            TelescopePromptBorder = { fg = "#7da5b3", bg = NONE },
-            TelescopeResultsNormal = { fg = theme.ui.fg_dim, bg = NONE },
-            TelescopeResultsBorder = { fg = "#7da5b3", bg =NONE },
-            TelescopePreviewNormal = { bg = NONE },
-            TelescopePreviewBorder = { bg = NONE, fg = "#7da5b3"},
+            TelescopePromptNormal = { bg = nil},
+            TelescopePromptBorder = { fg = "#7da5b3", bg = nil},
+            TelescopeResultsNormal = { fg = theme.ui.fg_dim, bg = nil},
+            TelescopeResultsBorder = { fg = "#7da5b3", bg = nil} ,
+            TelescopePreviewNormal = { bg = nil},
+            TelescopePreviewBorder = { bg = nil, fg = "#7da5b3"},
             Pmenu = { fg = theme.ui.shade0, bg = theme.ui.bg_p1 },  -- add `blend = vim.o.pumblend` to enable transparency
             PmenuSel = { fg = "NONE", bg = theme.ui.bg_p2 },
             PmenuSbar = { bg = theme.ui.bg_m1 },
@@ -51,7 +51,7 @@ vim.cmd("colorscheme kanagawa")
 local function transparent_background()
     vim.cmd('hi Normal guibg=NONE ctermbg=NONE | hi NormalNC guibg=NONE ctermbg=NONE | hi EndOfBuffer guibg=NONE ctermbg=NONE | hi VertSplit guibg=NONE ctermbg=NONE')
     vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "Grey" })
-    vim.api.nvim_set_hl(0, "TreesitterContext", { bg = NONE})
+    vim.api.nvim_set_hl(0, "TreesitterContext", { bg = nil})
     vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
     vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = "#85a5b2" })
     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
