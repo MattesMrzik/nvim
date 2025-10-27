@@ -301,8 +301,10 @@ local function filter_function_defs_from_references(references)
 end
 
 M.custom_lsp_references = function()
+    ---@class ReferencesParams : lsp.TextDocumentPositionParams
+    ---@field context { includeDeclaration: boolean }
     local params = vim.lsp.util.make_position_params(nil, "utf-16")
-    -- params.context = { includeDeclaration = false} -- i think there is no field context
+    params.context = { includeDeclaration = false} -- i think there is no field context
     vim.lsp.buf_request(0, "textDocument/references", params, function(err, references, _, _) -- third arg is ctx
         if err or not references or vim.tbl_isempty(references) then
             print(err)
@@ -327,7 +329,7 @@ M.custom_lsp_references = function()
             },
         })
 
-        local function make_entry(loc)
+            local function make_entry(loc)
             local filename = vim.uri_to_fname(loc.uri)
             filename = vim.fn.fnamemodify(filename, ":.")
             local lnum = loc.range.start.line
