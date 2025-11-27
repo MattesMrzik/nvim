@@ -36,7 +36,7 @@ local function get_min_win_size(bufnr)
             end
         end
     end
-    -- the minus 12 comes from the fact that the sign column and column for the line number 
+    -- the minus 12 comes from the fact that the sign column and column for the line number
     -- additionally subtracts from the window width
     return m - 12
 end
@@ -46,7 +46,7 @@ local function get_inlay_width(bufnr, line, col)
     local inlay_ns = vim.api.nvim_get_namespaces()["nvim.lsp.inlayhint"]
     if not inlay_ns then return 0 end
 
-    local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, inlay_ns, {line, 0}, {line, col}, {details = true})
+    local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, inlay_ns, { line, 0 }, { line, col }, { details = true })
     local total_width = 0
     for _, mark in ipairs(extmarks) do
         local virt_text = mark[4] and mark[4].virt_text
@@ -57,7 +57,7 @@ local function get_inlay_width(bufnr, line, col)
             end
         end
     end
-    return total_width +2
+    return total_width + 2
 end
 
 
@@ -85,19 +85,23 @@ function M.diagnostics_debug()
                 format = function(diagnostic)
                     local min_size = get_min_win_size(diagnostic.bufnr)
                     local remaining_width = min_size - diagnostic.col
-                    return wrap_diagnostic("vir col = " .. get_inlay_width(diagnostic.bufnr, diagnostic.lnum) .. ", min win size = " .. min_size .. ", col of warn = " .. diagnostic.col .. ", msg:\n" .. diagnostic.message, remaining_width)
+                    return wrap_diagnostic(
+                    "vir col = " ..
+                    get_inlay_width(diagnostic.bufnr, diagnostic.lnum) ..
+                    ", min win size = " ..
+                    min_size .. ", col of warn = " .. diagnostic.col .. ", msg:\n" .. diagnostic.message, remaining_width)
                 end,
             }
         })
     else
-        vim.diagnostic.config({virtual_lines = false})
+        vim.diagnostic.config({ virtual_lines = false })
     end
 end
 
 -- toggles diagnostics
 function M.toggle_diagnostics()
     -- either 2 or three, i would then also need to adjust the if else structure below
-    diagnostics_type = (diagnostics_type + 1) %2
+    diagnostics_type = (diagnostics_type + 1) % 2
     if diagnostics_type == 1 then
         vim.diagnostic.config({
             virtual_text = false,
@@ -116,7 +120,7 @@ function M.toggle_diagnostics()
     else
         vim.diagnostic.config({
             virtual_text = true,
-            virtual_lines= false,
+            virtual_lines = false,
         })
     end
 end

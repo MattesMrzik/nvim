@@ -1,5 +1,5 @@
 local gitsigns = require("gitsigns")
-require('gitsigns').setup{
+require('gitsigns').setup {
     on_attach = function(bufnr)
         local function map(mode, l, r, opts)
             opts = opts or {}
@@ -57,7 +57,7 @@ require('gitsigns').setup{
         map('n', '<leader>tw', gitsigns.toggle_word_diff)
 
         -- Text object
-        map({'o', 'x'}, 'ih', gitsigns.select_hunk)
+        map({ 'o', 'x' }, 'ih', gitsigns.select_hunk)
     end
 }
 
@@ -124,8 +124,9 @@ end, { desc = "Stage hunk at line 70 in gitsigns.lua" })
 --
 
 vim.keymap.set("n", "<leader>lh", function()
-    for i,h in ipairs(require("gitsigns").get_hunks() or {}) do
-        print(string.format("Hunk %d: %s %d-%d → %d-%d", i, h.type, h.removed.start, h.removed.count, h.added.start, h.added.count))
+    for i, h in ipairs(require("gitsigns").get_hunks() or {}) do
+        print(string.format("Hunk %d: %s %d-%d → %d-%d", i, h.type, h.removed.start, h.removed.count, h.added.start,
+            h.added.count))
     end
 end)
 

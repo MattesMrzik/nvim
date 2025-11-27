@@ -1,4 +1,4 @@
-vim.g.python3_host_prog =  "/Users/mrzi/.config/nvim/python_env/bin/python3"
+vim.g.python3_host_prog = "/Users/mrzi/.config/nvim/python_env/bin/python3"
 require("mattes")
 
 -- basic settings
@@ -19,8 +19,8 @@ vim.o.signcolumn = "yes:2"
 
 -- disable lsp references on esc press
 vim.api.nvim_create_autocmd("LspAttach", {
-  once = true,
-  callback = function()
-    pcall(vim.keymap.del, "n", "<Esc>")
-  end,
+    once = true,
+    callback = function()
+        pcall(vim.keymap.del, "n", "<Esc>")
+    end,
 })

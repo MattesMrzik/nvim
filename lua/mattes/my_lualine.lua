@@ -27,7 +27,7 @@ custom_powerline.command.c = custom_powerline.command.c or {}
 custom_powerline.command.b.bg = "#a73200"
 custom_powerline.command.c.bg = "#a80c00"
 
-local function set_fg(theme, sectionbcolor,sectionccolor)
+local function set_fg(theme, sectionbcolor, sectionccolor)
     -- insert
     theme.insert.b.fg = sectionbcolor
     theme.insert.c.fg = sectionccolor
@@ -64,13 +64,13 @@ require('lualine').setup({
     sections = {
         lualine_c = {
             --{ 'filename', path = 1, color = {bg = "#303030", fg = '#9e9e9e'}}
-            { 'filename', path = 1,}
+            { 'filename', path = 1, }
         },
         lualine_x = {},
     },
     inactive_sections = {
         lualine_c = {
-            { 'filename', path = 1},
+            { 'filename', path = 1 },
         },
     },
 })

@@ -194,7 +194,7 @@ end
 
 M.custom_lsp_document_symbols = function()
     vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() },
-        function(err, symbols, _, _)                                                                                                                -- third arg is ctx
+        function(err, symbols, _, _) -- third arg is ctx
             if err or not symbols then return end
 
             local flat_symbols = {}
@@ -409,7 +409,7 @@ end
 
 M.custom_lsp_implementations = function()
     vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"),
-        function(err, implementations, _, _)                                                                                                     -- third arg is ctx
+        function(err, implementations, _, _) -- third arg is ctx
             if err or not implementations then
                 vim.notify("No implementations found", vim.log.levels.INFO)
                 return
@@ -495,7 +495,7 @@ end
 M.custom_lsp_implementations_not_working = function()
     local Snacks = require("mattes.snacks")
     vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"),
-        function(err, implementations, _, _)                                                                                                     -- third arg is ctx
+        function(err, implementations, _, _) -- third arg is ctx
             if err or not implementations then
                 vim.notify("No implementations found", vim.log.levels.INFO)
                 return
@@ -551,7 +551,7 @@ M.custom_lsp_implementations_not_working = function()
 end
 M.custom_workspace_symbols = function()
     vim.lsp.buf_request(0, "workspace/symbol", { query = "", searchKind = "allSymbols" },
-        function(err, symbols, _, _)                                                                                 -- third arg is ctx
+        function(err, symbols, _, _) -- third arg is ctx
             if err then
                 print("LSP error:", vim.inspect(err))
                 return
