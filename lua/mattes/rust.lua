@@ -1,48 +1,201 @@
-local function setup_rust_lsp(feature)
-  vim.lsp.config("rust_analyzer", {
-    cmd = { "/Users/mrzi/.cargo/bin/rust-analyzer" },
-    settings = {
-      ["rust-analyzer"] = {
-        semanticHighlighting = false,
-        check = { command = "clippy" },
-        cargo = { features = { feature or "" } },
-        diagnostics = { enable = true },
-        workspace = {
-          symbol = { search = { limit = 10000 } },
+local function stop_rust_analyzers()
+    local clients = vim.lsp.get_clients({ name = "rust_analyzer" })
+    if #clients == 0 then return end
+    for _, client in ipairs(clients) do
+        vim.lsp.stop_client(client.id, true)
+    end
+end
+
+
+local function setup_rust_lsp(features)
+    -- alternatively i could do similar to this: https://rutar.org/writing/rust-analyzer-dynamic-features/
+    stop_rust_analyzers()
+    vim.lsp.config("rust_analyzer", {
+        cmd = { "/Users/mrzi/.cargo/bin/rust-analyzer" },
+        settings = {
+            ["rust-analyzer"] = {
+                semanticHighlighting = false,
+                check = { command = "clippy" },
+                cargo = features,
+                diagnostics = { enable = true },
+                workspace = {
+                    symbol = { search = { limit = 10000 } },
+                },
+            },
         },
-      },
-    },
-    on_attach = function(_, bufnr) -- first param is the client, which we don't use
-      -- Delay inlay hints to allow LSP to initialize
-      vim.defer_fn(function()
-        local ft = vim.bo[bufnr].filetype
-        if not ft:match("^Diffview") then
-          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-        end
+        -- on_attach = function(_, bufnr) -- first param is the client, which we don't use
+        --   -- Delay inlay hints to allow LSP to initialize
+        --   vim.notify("Rust Analyzer attached", vim.log.levels.INFO)
+        --   vim.defer_fn(function()
+        --       vim.cmd("edit")
+        --     local ft = vim.bo[bufnr].filetype
+        --     if not ft:match("^Diffview") then
+        --       vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        --     end
+        --
+        --     -- Optional hover customization (commented out)
+        --     -- local hover = vim.lsp.buf.hover
+        --     -- vim.lsp.buf.hover = function()
+        --     --   return hover({ max_width = 100, max_height = 14, border = utils.border })
+        --     -- end
+        --   end, 4000)
+        -- end,
+    })
 
-        -- Optional hover customization (commented out)
-        -- local hover = vim.lsp.buf.hover
-        -- vim.lsp.buf.hover = function()
-        --   return hover({ max_width = 100, max_height = 14, border = utils.border })
-        -- end
-      end, 4000)
-    end,
-  })
-
-  -- Enable the server for its filetypes
-  vim.lsp.enable("rust_analyzer")
+    -- Enable the server for its filetypes
+    vim.lsp.enable("rust_analyzer")
 end
 
 setup_rust_lsp()
 
+local function rust_get_cargo_toml()
+    local ra = vim.lsp.get_clients({ name = "rust_analyzer" })[1]
+    if not ra then return nil end
 
--- enables cargo fmt on save, i think this might be less efficient than rust fmt since 
+    local root
+    if ra.workspace_folders then
+        root = vim.uri_to_fname(ra.workspace_folders[1].uri)
+    else
+        root = ra.config.root_dir
+    end
+
+    return root .. "/Cargo.toml"
+end
+
+local function get_cargo_features(cargo_toml_path)
+    local features = {}
+
+    local in_features_block = false
+
+    for line in io.lines(cargo_toml_path) do
+        -- trim spaces
+        line = line:match("^%s*(.-)%s*$")
+
+        if line:match("^%[features%]") then
+            in_features_block = true
+        elseif in_features_block then
+            if line == "" then
+                break -- end of [features] block
+            end
+
+            -- match feature name before '='
+            local name = line:match("^([%w%-%_]+)%s*=")
+            if name then
+                table.insert(features, name)
+            end
+        end
+    end
+
+    return features
+end
+
+local M = {
+    features = {},       -- array of feature names
+    feature_status = {}, -- dict: feature_name → boolean
+}
+
+-- Sync features with cargo_features from Cargo.toml
+function M.sync_features(cargo_features)
+    local present = {}
+
+    -- mark all cargo features as present
+    for _, f in ipairs(cargo_features) do
+        present[f] = true
+    end
+
+    -- 1) remove features no longer present
+    for i = #M.features, 1, -1 do
+        local f = M.features[i]
+        if not present[f] then
+            table.remove(M.features, i)
+            M.feature_status[f] = nil
+        end
+    end
+
+    -- 2) add new features
+    for _, f in ipairs(cargo_features) do
+        if M.feature_status[f] == nil then
+            table.insert(M.features, f)
+            M.feature_status[f] = false -- default disabled
+        end
+    end
+end
+
+function M.toggle_features()
+    local cargo_toml = rust_get_cargo_toml()
+    if not cargo_toml then
+        vim.notify("Could not find Cargo.toml for Rust Analyzer", vim.log.levels.ERROR)
+        return
+    end
+    local features = get_cargo_features(cargo_toml)
+    M.sync_features(features)
+
+    local function build_display_list()
+        local t = {}
+        table.insert(t, "Done")
+
+        for _, f in ipairs(M.features) do
+            local mark = M.feature_status[f] and "x" or " "
+            table.insert(t, mark .. " " .. f)
+        end
+
+        return t
+    end
+    local changed = false
+
+    local function reopen_menu()
+        vim.ui.select(build_display_list(), {
+            prompt = "Toggle Rust features:",
+        }, function(choice)
+            if not choice or choice == "Done" then
+                if changed then
+                    vim.notify("Restarting Rust Analyzer with new features", vim.log.levels.INFO)
+                    setup_rust_lsp(M.get_cargo_feature_table())
+
+                    -- vim.defer_fn(function()
+                    --     local view = vim.fn.winsaveview()
+                    --     vim.cmd("edit")
+                    --     vim.fn.winrestview(view)
+                    -- end, 4000)
+                else
+                    vim.notify("No changes to features", vim.log.levels.INFO)
+                end
+                return
+            end
+
+            -- strip "✓ " or "  "
+            local feature = choice:sub(3)
+
+            -- toggle
+            M.feature_status[feature] = not M.feature_status[feature]
+            changed = true
+
+            reopen_menu()
+        end)
+    end
+
+    reopen_menu()
+end
+
+function M.get_cargo_feature_table()
+    local enabled = {}
+
+    for _, f in ipairs(M.features) do
+        if M.feature_status[f] then
+            table.insert(enabled, f)
+        end
+    end
+
+    return { features = enabled }
+end
+
+-- enables cargo fmt on save, i think this might be less efficient than rust fmt since
 -- cargo does every file (i think) and not only the changed ones, but (i think) cargo fmt produces better formats
 vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = "*.rs",
-  callback = function()
-    vim.lsp.buf.format()
-  end
+    pattern = "*.rs",
+    callback = function()
+        vim.lsp.buf.format()
+    end
 })
 -- shows deduced variable types as hint
 vim.lsp.inlay_hint.enable(true)
@@ -92,19 +245,19 @@ cmp.setup({
         ["<C-f>"] = cmp.mapping.scroll_docs(4),
         ["<C-Space>"] = cmp.mapping.complete(),
         ["<C-e>"] = cmp.mapping.close(),
-        ["<CR>"] = cmp.mapping.confirm({behaviour = cmp.ConfirmBehavior.Insert}),
+        ["<CR>"] = cmp.mapping.confirm({ behaviour = cmp.ConfirmBehavior.Insert }),
         ["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
         ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
     },
-    sources =  {
-        { name = 'nvim_lsp', entry_filter = modify_text_edit},
+    sources = {
+        { name = 'nvim_lsp', entry_filter = modify_text_edit },
         { name = 'vsnip' },
         { name = 'path' },
         { name = 'buffer' },
     },
     sorting = {
         comparators = {
-            function (e1, e2)
+            function(e1, e2)
                 return compare_kinds(types.lsp.CompletionItemKind.Text, true)(e1, e2)
             end,
             cmp.config.compare.exact,
@@ -129,42 +282,39 @@ cmp.setup({
 })
 
 --cmp.event:on('confirm_done', function(event)
-    --print("Confirm done event triggered")
-    --local entry = event.entry
-    --local item = entry:get_completion_item()
-    --if item.textEdit and item.textEdit.range then
-        --print("TextEdit range found, processing...")
-        --print(vim.inspect(item.textEdit))
-        --local range = item.textEdit.range
-        ---- Only patch if the range is on a single line and removes at most one word
-        --if range.start.line == range["end"].line then
-        --local bufnr = vim.api.nvim_get_current_buf()
-        --local line_text = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)[1] or ""
-        --local removed_text = line_text:sub(range.start.character + 1 - #item.textEdit.newText, range["end"].character - #item.textEdit.newText + 1)
-        --print("Removed text: " .. removed_text)
-        ---- Check if the removed text is a single word (no whitespace)
-        ----if removed_text:match("^%w+$") then
-            --print("Single word removed, patching textEdit range...")
-            ---- Patch the end column to match the start column (insert only, don't replace)
-            --item.textEdit.range["end"].character = item.textEdit.range.start.character
-            --entry.completion_item = item
-        ----end
-    --end
+--print("Confirm done event triggered")
+--local entry = event.entry
+--local item = entry:get_completion_item()
+--if item.textEdit and item.textEdit.range then
+--print("TextEdit range found, processing...")
+--print(vim.inspect(item.textEdit))
+--local range = item.textEdit.range
+---- Only patch if the range is on a single line and removes at most one word
+--if range.start.line == range["end"].line then
+--local bufnr = vim.api.nvim_get_current_buf()
+--local line_text = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)[1] or ""
+--local removed_text = line_text:sub(range.start.character + 1 - #item.textEdit.newText, range["end"].character - #item.textEdit.newText + 1)
+--print("Removed text: " .. removed_text)
+---- Check if the removed text is a single word (no whitespace)
+----if removed_text:match("^%w+$") then
+--print("Single word removed, patching textEdit range...")
+---- Patch the end column to match the start column (insert only, don't replace)
+--item.textEdit.range["end"].character = item.textEdit.range.start.character
+--entry.completion_item = item
+----end
+--end
 --end
 --end)
 
 
 -- utility method used in remap.lua
 local ts_utils = require("nvim-treesitter.ts_utils")
-local M = {}
 
-M.last_feature = ""
 function M.setup_rust_lsp(feature)
     setup_rust_lsp(feature)
 end
 
 function M.jump_to_trait()
-
     -- Step 1: Find function_item and extract function name
     local node = ts_utils.get_node_at_cursor()
     local fn_name = nil
@@ -244,7 +394,7 @@ function M.jump_to_trait()
                         if not fn_name then
                             -- no specific function, jump to start of trait
                             vim.api.nvim_set_current_buf(bufnr)
-                            vim.api.nvim_win_set_cursor(0, { lnum + 1, col})
+                            vim.api.nvim_win_set_cursor(0, { lnum + 1, col })
                             return
                         end
 
@@ -258,7 +408,7 @@ function M.jump_to_trait()
                                         if text == fn_name then
                                             local srow, scol = subnode:range()
                                             vim.api.nvim_set_current_buf(bufnr)
-                                            vim.api.nvim_win_set_cursor(0, { srow+1, scol})
+                                            vim.api.nvim_win_set_cursor(0, { srow + 1, scol })
                                             return
                                         end
                                     end
@@ -267,7 +417,6 @@ function M.jump_to_trait()
                         end
 
                         print("Function not found in trait.")
-
                     end)
                     return
                 end
@@ -280,4 +429,3 @@ function M.jump_to_trait()
 end
 
 return M
-

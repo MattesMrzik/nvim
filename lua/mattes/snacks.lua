@@ -2,7 +2,7 @@ local snacks = require("snacks")
 snacks.setup {
     animate = { enabled = false },
     bigfile = { enabled = true },
-    dashboard = { enabled = false},
+    dashboard = { enabled = false },
     indent = {
         enabled = true,
         animate = {
@@ -49,5 +49,3 @@ snacks.setup {
     statuscolumn = { enabled = true },
     words = { enabled = true },
 }
-
-

@@ -76,20 +76,20 @@ local function flatten(symbols, result)
 end
 
 local function get_block_info(line, bufnr)
-    local node = vim.treesitter.get_node({bufnr = bufnr, pos = {line,0} })
+    local node = vim.treesitter.get_node({ bufnr = bufnr, pos = { line, 0 } })
     local while_count = 0
     local patterns = {
         "^(impl.*)",
-        "(trait .*)",   -- match e.g. "(trait MyTrait)"
-        "(struct .*)",  -- match e.g. "(struct MyStruct)"
+        "(trait .*)",  -- match e.g. "(trait MyTrait)"
+        "(struct .*)", -- match e.g. "(struct MyStruct)"
     }
     while node do
-        while_count = while_count +1
+        while_count = while_count + 1
         if while_count > 10 then
             break
         end
         local start_row, _, _, _ = vim.treesitter.get_node_range(node) -- start_col, end_row, end_col
-        local lines = vim.api.nvim_buf_get_lines(bufnr, start_row-1, start_row + 10, false)
+        local lines = vim.api.nvim_buf_get_lines(bufnr, start_row - 1, start_row + 10, false)
         for i, l in pairs(lines) do
             if i > 10 then
                 break
@@ -111,7 +111,7 @@ M.dynamic_layout_config = function()
     local is_bottom = cursor_line > total_lines / 2
     return {
         height = 0.47,
-        width = 0.8,
+        width = 0.99,
         --prompt_position = "top",
         anchor = is_bottom and "N" or "S",
     }
@@ -136,7 +136,7 @@ local function get_highlights(text_and_hl)
         for hl_i = 1, #highlights_for_col do
             table.insert(highlights, highlights_for_col[hl_i])
         end
-        end_string = end_string ..  text .. sep
+        end_string = end_string .. text .. sep
     end
     return end_string, highlights
 end
@@ -149,7 +149,8 @@ local function highlight_code(lang)
         local telescope_highlights = {}
         for _, extmark in ipairs(hls) do
             if extmark.col and extmark.end_col and extmark.hl_group then
-                table.insert(telescope_highlights, { {extmark.col + offset, extmark.end_col + offset}, extmark.hl_group })
+                table.insert(telescope_highlights, { { extmark.col + offset, extmark.end_col + offset }, extmark
+                    .hl_group })
             end
         end
         return telescope_highlights
@@ -158,7 +159,7 @@ end
 
 local function return_hl_as_fn(hl)
     return function(text, offset)
-        return {{{offset, #text + offset}, hl}}
+        return { { { offset, #text + offset }, hl } }
     end
 end
 
@@ -192,67 +193,68 @@ local function shorten_custom(text, max_length)
 end
 
 M.custom_lsp_document_symbols = function()
-    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, function(err, symbols, _, _) -- third arg is ctx
-        if err or not symbols then return end
+    vim.lsp.buf_request(0, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() },
+        function(err, symbols, _, _)                                                                                                                -- third arg is ctx
+            if err or not symbols then return end
 
-        local flat_symbols = {}
-        flatten(symbols, flat_symbols)
+            local flat_symbols = {}
+            flatten(symbols, flat_symbols)
 
-        local function make_entry(symbol)
-            local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
-            if kind == "Interface" or kind == "Object" then
-                kind = "Trait"
+            local function make_entry(symbol)
+                local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
+                if kind == "Interface" or kind == "Object" then
+                    kind = "Trait"
+                end
+                local icon = kind_icons[kind] or ""
+                local hl = kind_highlights[kind] or ""
+                -- local detail = symbol.detail or ""
+                local custom = get_block_info(symbol.range.start.line + 1, 0) or ""
+                local result = shorten_custom(custom, 50)
+                return {
+                    value = symbol,
+                    ordinal = symbol.name .. " " .. kind,
+                    display = function()
+                        local highlighted_text, highlights = get_highlights(
+                            {
+                                { icon,        return_hl_as_fn(hl),    3 },
+                                { symbol.name, return_hl_as_fn(hl),    30 },
+                                { result,      highlight_code("rust"), 50 },
+                            }
+                        )
+                        return highlighted_text, highlights
+                    end,
+                    lnum = symbol.selectionRange.start.line + 1,
+                    col = symbol.selectionRange.start.character + 1,
+                    filename = vim.api.nvim_buf_get_name(0),
+                }
             end
-            local icon = kind_icons[kind] or ""
-            local hl = kind_highlights[kind] or ""
-            -- local detail = symbol.detail or ""
-            local custom = get_block_info(symbol.range.start.line+1, 0) or ""
-            local result = shorten_custom(custom, 50)
-            return {
-                value = symbol,
-                ordinal = symbol.name .. " " .. kind,
-                display = function()
-                    local highlighted_text, highlights = get_highlights(
-                        {
-                            {icon, return_hl_as_fn(hl), 3},
-                            {symbol.name, return_hl_as_fn(hl), 30},
-                            {result, highlight_code("rust"), 50},
-                        }
-                    )
-                    return highlighted_text, highlights
-                end,
-                lnum = symbol.selectionRange.start.line + 1,
-                col = symbol.selectionRange.start.character + 1,
-                filename = vim.api.nvim_buf_get_name(0),
-            }
-        end
 
-        local sorter = conf.generic_sorter({})
+            local sorter = conf.generic_sorter({})
 
-        -- the highlighter should only highlight the (first and) second col, ie where the name is in 
-        sorter.highlighter = sub_fzy(4, 34)
-        local style = M.dynamic_layout_config()
+            -- the highlighter should only highlight the (first and) second col, ie where the name is in
+            sorter.highlighter = sub_fzy(4, 34)
+            local style = M.dynamic_layout_config()
 
-        pickers.new({}, {
-            prompt_title = "My Document Symbols",
-            preview_title = "",
-            results_title = "",
-            finder = finders.new_table({
-                results = flat_symbols,
-                entry_maker = make_entry,
-            }),
-            previewer = conf.qflist_previewer({}),
-            sorter = sorter,
-            layout_config = {
-                horizontal = {
-                    preview_width = 0.4, -- percent of total width; default is 0.5
-                    height = style.height,
-                    width = style.width,
-                    anchor = style.anchor,
+            pickers.new({}, {
+                prompt_title = "My Document Symbols for " .. vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":."),
+                preview_title = "",
+                results_title = "",
+                finder = finders.new_table({
+                    results = flat_symbols,
+                    entry_maker = make_entry,
+                }),
+                previewer = conf.qflist_previewer({}),
+                sorter = sorter,
+                layout_config = {
+                    horizontal = {
+                        preview_width = 0.4, -- percent of total width; default is 0.5
+                        height = style.height,
+                        width = style.width,
+                        anchor = style.anchor,
+                    },
                 },
-            },
-        }):find()
-    end)
+            }):find()
+        end)
 end
 
 local function filter_function_defs_from_references(references)
@@ -286,12 +288,13 @@ local function filter_function_defs_from_references(references)
             end
         end
 
-        local node = vim.treesitter.get_node({bufnr = bufnr, pos = {lnum,col} })
+        local node = vim.treesitter.get_node({ bufnr = bufnr, pos = { lnum, col } })
         if node == nil then
-            vim.notify("No node found at position: " .. lnum .. ":" .. col .. " in file: " .. filename, vim.log.levels.WARN)
+            vim.notify("No node found at position: " .. lnum .. ":" .. col .. " in file: " .. filename,
+                vim.log.levels.WARN)
             return false
         end
-        if node:parent():type() =="function_item" then
+        if node:parent():type() == "function_item" then
             return false
         else
             return true
@@ -304,7 +307,7 @@ M.custom_lsp_references = function()
     ---@class ReferencesParams : lsp.TextDocumentPositionParams
     ---@field context { includeDeclaration: boolean }
     local params = vim.lsp.util.make_position_params(nil, "utf-16")
-    params.context = { includeDeclaration = false} -- i think there is no field context
+    params.context = { includeDeclaration = false }                                           -- i think there is no field context
     vim.lsp.buf_request(0, "textDocument/references", params, function(err, references, _, _) -- third arg is ctx
         if err or not references or vim.tbl_isempty(references) then
             print(err)
@@ -329,7 +332,7 @@ M.custom_lsp_references = function()
             },
         })
 
-            local function make_entry(loc)
+        local function make_entry(loc)
             local filename = vim.uri_to_fname(loc.uri)
             filename = vim.fn.fnamemodify(filename, ":.")
             local lnum = loc.range.start.line
@@ -366,7 +369,7 @@ M.custom_lsp_references = function()
             previewer = conf.qflist_previewer({}),
             sorter = sorter,
             layout_config = {
-                horizontal = { preview_width = 0.4},
+                horizontal = { preview_width = 0.4 },
                 height = style.height,
                 width = style.width,
                 anchor = style.anchor,
@@ -389,7 +392,7 @@ local function load_buffer_and_treesitter_parse(filename)
         vim.fn.bufload(bufnr)
     end
 
-    require("lua.mattes.gitsigns").detach(bufnr)
+    require("gitsigns").detach(bufnr)
     local parser = vim.treesitter.get_parser(bufnr, "rust")
     if not parser then
         print("No parser available for language: rust")
@@ -405,230 +408,232 @@ local function load_buffer_and_treesitter_parse(filename)
 end
 
 M.custom_lsp_implementations = function()
-    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, _, _) -- third arg is ctx
-        if err or not implementations then
-            vim.notify("No implementations found", vim.log.levels.INFO)
-            return
-        end
+    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"),
+        function(err, implementations, _, _)                                                                                                     -- third arg is ctx
+            if err or not implementations then
+                vim.notify("No implementations found", vim.log.levels.INFO)
+                return
+            end
 
-        local current_file = vim.api.nvim_buf_get_name(0)
-        local cursor_pos = vim.api.nvim_win_get_cursor(0)
-        local filtered_implementations = vim.tbl_filter(function(implementation)
-            return not (
-                vim.uri_to_fname(implementation.targetUri) == current_file and
-                implementation.targetSelectionRange.start.line + 1 == cursor_pos[1]
-            )
-        end, implementations)
+            local current_file = vim.api.nvim_buf_get_name(0)
+            local cursor_pos = vim.api.nvim_win_get_cursor(0)
+            local filtered_implementations = vim.tbl_filter(function(implementation)
+                return not (
+                    vim.uri_to_fname(implementation.targetUri) == current_file and
+                    implementation.targetSelectionRange.start.line + 1 == cursor_pos[1]
+                )
+            end, implementations)
 
-        if #filtered_implementations == 0 then
-            print("No other implementations found")
-            return
-        end
+            if #filtered_implementations == 0 then
+                print("No other implementations found")
+                return
+            end
 
-        -- local displayer = entry_display.create({
-        --     separator = " ",
-        --     items = {
-        --         { width = 30 },
-        --         { remaining = true },
-        --     },
-        -- })
+            -- local displayer = entry_display.create({
+            --     separator = " ",
+            --     items = {
+            --         { width = 30 },
+            --         { remaining = true },
+            --     },
+            -- })
 
-        local function make_entry(implementation)
-            local filename = vim.uri_to_fname(implementation.targetUri)
-            filename = vim.fn.fnamemodify(filename, ":.")
+            local function make_entry(implementation)
+                local filename = vim.uri_to_fname(implementation.targetUri)
+                filename = vim.fn.fnamemodify(filename, ":.")
 
-            local bufnr = load_buffer_and_treesitter_parse(filename)
-            local line_number = implementation.targetSelectionRange.start.line
-            local column = implementation.targetSelectionRange.start.character
-            local custom = get_block_info(line_number, bufnr) or ""
-            local result = shorten_custom(custom, 50)
-            return {
-                value = implementation,
-                ordinal = filename,
-                display = function()
-                local highlighted_text, highlights = get_highlights(
-                        {
-                            {filename, return_hl_as_fn("oldWhite"), 30},
-                            {result, highlight_code("rust"), 50},
-                        }
-                    )
-                    return highlighted_text, highlights
-                end,
-                filename = filename,
-                lnum = line_number + 1,
-                col = column + 1,
-            }
-        end
+                local bufnr = load_buffer_and_treesitter_parse(filename)
+                local line_number = implementation.targetSelectionRange.start.line
+                local column = implementation.targetSelectionRange.start.character
+                local custom = get_block_info(line_number, bufnr) or ""
+                local result = shorten_custom(custom, 50)
+                return {
+                    value = implementation,
+                    ordinal = filename,
+                    display = function()
+                        local highlighted_text, highlights = get_highlights(
+                            {
+                                { filename, return_hl_as_fn("oldWhite"), 30 },
+                                { result,   highlight_code("rust"),      50 },
+                            }
+                        )
+                        return highlighted_text, highlights
+                    end,
+                    filename = filename,
+                    lnum = line_number + 1,
+                    col = column + 1,
+                }
+            end
 
-        local sorter = conf.generic_sorter({})
-        sorter.highlighter = function(_, line, prompt)
-            -- TODO: is this the correct order? is the line and the prompt in the line above really in this order?
-            return fzy.positions(line, prompt)
-        end
+            local sorter = conf.generic_sorter({})
+            sorter.highlighter = function(_, line, prompt)
+                -- TODO: is this the correct order? is the line and the prompt in the line above really in this order?
+                return fzy.positions(line, prompt)
+            end
 
-        local style = M.dynamic_layout_config()
+            local style = M.dynamic_layout_config()
 
-        pickers.new({}, {
-            prompt_title = "My LSP Implementations",
-            preview_title = "",
-            results_title = "",
+            pickers.new({}, {
+                prompt_title = "My LSP Implementations",
+                preview_title = "",
+                results_title = "",
 
-            finder = finders.new_table({
-                results = filtered_implementations,
-                entry_maker = make_entry,
-            }),
-            previewer = conf.qflist_previewer({}),
-            sorter = sorter,
-            layout_config = {
-                horizontal = { preview_width = 0.4 },
-                height = style.height,
-                width = style.width,
-                anchor = style.anchor,
-            },
-        }):find()
-    end)
+                finder = finders.new_table({
+                    results = filtered_implementations,
+                    entry_maker = make_entry,
+                }),
+                previewer = conf.qflist_previewer({}),
+                sorter = sorter,
+                layout_config = {
+                    horizontal = { preview_width = 0.4 },
+                    height = style.height,
+                    width = style.width,
+                    anchor = style.anchor,
+                },
+            }):find()
+        end)
 end
 M.custom_lsp_implementations_not_working = function()
     local Snacks = require("mattes.snacks")
-    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"), function(err, implementations, _, _) -- third arg is ctx
-        if err or not implementations then
-            vim.notify("No implementations found", vim.log.levels.INFO)
-            return
-        end
-
-        local current_file = vim.api.nvim_buf_get_name(0)
-        local cursor_pos = vim.api.nvim_win_get_cursor(0)
-        local filtered = vim.tbl_filter(function(impl)
-            return not (
-                vim.uri_to_fname(impl.targetUri) == current_file and
-                impl.targetSelectionRange.start.line + 1 == cursor_pos[1]
-            )
-        end, implementations)
-
-        if #filtered == 0 then
-            vim.notify("No other implementations found", vim.log.levels.INFO)
-            return
-        end
-
-        local items = {}
-        for _, impl in ipairs(filtered) do
-            local filename = vim.uri_to_fname(impl.targetUri)
-            filename = vim.fn.fnamemodify(filename, ":.")
-            local line = impl.targetSelectionRange.start.line
-            local col = impl.targetSelectionRange.start.character
-            local bufnr = load_buffer_and_treesitter_parse(filename)
-            local custom = get_block_info(line, bufnr) or ""
-
-            table.insert(items, {
-                value = impl,
-                file = filename,
-                preview = {
-                    file = filename,
-                    line = line + 1,
-                    col = col,
-                },
-                --line = custom,
-                pos = {line + 1, col},
-                text = custom,
-            })
-        end
-
-        Snacks.picker {
-            title = "LSP Implementations",
-            items = items,
-            matcher = {
-                mods = {
-                    field = "file",
-                }
-            }
-        }
-    end)
-end
-M.custom_workspace_symbols = function()
-    vim.lsp.buf_request(0, "workspace/symbol", {query = "", searchKind = "allSymbols"}, function(err, symbols, _, _) -- third arg is ctx
-        if err then
-            print("LSP error:", vim.inspect(err))
-            return
-        end
-        if not symbols or vim.tbl_isempty(symbols) then
-            vim.notify("No symbols found, perhaps lsp is still booting.", vim.log.levels.INFO)
-            return
-        end
-        local flat_symbols= {}
-        flatten(symbols, flat_symbols)
-
-        -- TODO this able this when running on not rust
-        M.get_cached_work_space_symbols_block_info(flat_symbols)
-        --print(vim.inspect(M.cached_work_space_symbols_cleaned))
-        local first_col_width = 20
-        local second_col_width = 30
-
-        local function make_entry(symbol)
-            local filename = vim.uri_to_fname(symbol.location.uri)
-            filename = vim.fn.fnamemodify(filename, ":.")
-            local lnum = symbol.location.range.start.line
-            local col = symbol.location.range.start.character
-            local name = symbol.name
-            local kind = vim.lsp.protocol.SymbolKind[symbol.kind]
-            if kind == "Interface" or kind == "Object" then
-                kind = "Trait"
+    vim.lsp.buf_request(0, "textDocument/implementation", vim.lsp.util.make_position_params(nil, "utf-16"),
+        function(err, implementations, _, _)                                                                                                     -- third arg is ctx
+            if err or not implementations then
+                vim.notify("No implementations found", vim.log.levels.INFO)
+                return
             end
 
-            local hl = kind_highlights[kind] or ""
+            local current_file = vim.api.nvim_buf_get_name(0)
+            local cursor_pos = vim.api.nvim_win_get_cursor(0)
+            local filtered = vim.tbl_filter(function(impl)
+                return not (
+                    vim.uri_to_fname(impl.targetUri) == current_file and
+                    impl.targetSelectionRange.start.line + 1 == cursor_pos[1]
+                )
+            end, implementations)
 
-            local key = filename .. ":" .. lnum .. ":" .. col .. ":" .. name
-            local custom = M.cached_work_space_symbols[key]
-            local result = shorten_custom(custom or "", 50)
+            if #filtered == 0 then
+                vim.notify("No other implementations found", vim.log.levels.INFO)
+                return
+            end
 
-            return {
-                value = symbol,
-                ordinal = name .. " " .. kind,
-                display = function ()
-                    local t, h = get_highlights({
-                        {filename, return_hl_as_fn("oldWhite"), first_col_width},
-                        {name, return_hl_as_fn("oldWhite"), second_col_width},
-                        {kind, return_hl_as_fn(hl), 10},
-                        {result, highlight_code("rust"), 50},
-                    })
-                    return t, h
-                end,
-                filename = filename,
-                lnum = lnum + 1,
-                col = col + 1,
+            local items = {}
+            for _, impl in ipairs(filtered) do
+                local filename = vim.uri_to_fname(impl.targetUri)
+                filename = vim.fn.fnamemodify(filename, ":.")
+                local line = impl.targetSelectionRange.start.line
+                local col = impl.targetSelectionRange.start.character
+                local bufnr = load_buffer_and_treesitter_parse(filename)
+                local custom = get_block_info(line, bufnr) or ""
+
+                table.insert(items, {
+                    value = impl,
+                    file = filename,
+                    preview = {
+                        file = filename,
+                        line = line + 1,
+                        col = col,
+                    },
+                    --line = custom,
+                    pos = { line + 1, col },
+                    text = custom,
+                })
+            end
+
+            Snacks.picker {
+                title = "LSP Implementations",
+                items = items,
+                matcher = {
+                    mods = {
+                        field = "file",
+                    }
+                }
             }
-        end
+        end)
+end
+M.custom_workspace_symbols = function()
+    vim.lsp.buf_request(0, "workspace/symbol", { query = "", searchKind = "allSymbols" },
+        function(err, symbols, _, _)                                                                                 -- third arg is ctx
+            if err then
+                print("LSP error:", vim.inspect(err))
+                return
+            end
+            if not symbols or vim.tbl_isempty(symbols) then
+                vim.notify("No symbols found, perhaps lsp is still booting.", vim.log.levels.INFO)
+                return
+            end
+            local flat_symbols = {}
+            flatten(symbols, flat_symbols)
 
-        local sorter = conf.generic_sorter({})
-        sorter.highlighter = sub_fzy(first_col_width, first_col_width + second_col_width)
-        local style = M.dynamic_layout_config()
-        pickers.new({}, {
-            prompt_title = "My LSP Workspace symbols",
-            preview_title = "",
-            results_title = "",
+            -- TODO this able this when running on not rust
+            M.get_cached_work_space_symbols_block_info(flat_symbols)
+            --print(vim.inspect(M.cached_work_space_symbols_cleaned))
+            local first_col_width = 20
+            local second_col_width = 30
 
-            finder = finders.new_table({
-                results = flat_symbols,
-                entry_maker = make_entry,
-            }),
-            previewer = conf.qflist_previewer({}),
-            sorter = sorter,
-            layout_config = {
-                horizontal = { preview_width = 0.4},
-                height = style.height,
-                width = style.width,
-                anchor = style.anchor,
-            },
-        }):find()
+            local function make_entry(symbol)
+                local filename = vim.uri_to_fname(symbol.location.uri)
+                filename = vim.fn.fnamemodify(filename, ":.")
+                local lnum = symbol.location.range.start.line
+                local col = symbol.location.range.start.character
+                local name = symbol.name
+                local kind = vim.lsp.protocol.SymbolKind[symbol.kind]
+                if kind == "Interface" or kind == "Object" then
+                    kind = "Trait"
+                end
 
-    end)
+                local hl = kind_highlights[kind] or ""
+
+                local key = filename .. ":" .. lnum .. ":" .. col .. ":" .. name
+                local custom = M.cached_work_space_symbols[key]
+                local result = shorten_custom(custom or "", 50)
+
+                return {
+                    value = symbol,
+                    ordinal = name .. " " .. kind,
+                    display = function()
+                        local t, h = get_highlights({
+                            { filename, return_hl_as_fn("oldWhite"), first_col_width },
+                            { name,     return_hl_as_fn("oldWhite"), second_col_width },
+                            { kind,     return_hl_as_fn(hl),         10 },
+                            { result,   highlight_code("rust"),      50 },
+                        })
+                        return t, h
+                    end,
+                    filename = filename,
+                    lnum = lnum + 1,
+                    col = col + 1,
+                }
+            end
+
+            local sorter = conf.generic_sorter({})
+            sorter.highlighter = sub_fzy(first_col_width, first_col_width + second_col_width)
+            local style = M.dynamic_layout_config()
+            pickers.new({}, {
+                prompt_title = "My LSP Workspace symbols",
+                preview_title = "",
+                results_title = "",
+
+                finder = finders.new_table({
+                    results = flat_symbols,
+                    entry_maker = make_entry,
+                }),
+                previewer = conf.qflist_previewer({}),
+                sorter = sorter,
+                layout_config = {
+                    horizontal = { preview_width = 0.4 },
+                    height = style.height,
+                    width = style.width,
+                    anchor = style.anchor,
+                },
+            }):find()
+        end)
 end
 
 M.dynamic_picker = function(picker_fn, opts)
-  opts = opts or {}
-  opts.layout_config = M.dynamic_layout_config()
-  opts.results_title = ""
-  opts.preview_title = ""
-  picker_fn(opts)
+    opts = opts or {}
+    opts.layout_config = M.dynamic_layout_config()
+    opts.results_title = ""
+    opts.preview_title = ""
+    picker_fn(opts)
 end
 
 M.two_column_grep_string = function(opts)
@@ -655,7 +660,7 @@ M.two_column_grep_string = function(opts)
             display = function()
                 return displayer({
                     filename,
-                    {text, "TelescopeMyHint"},
+                    { text, "TelescopeMyHint" },
                 })
             end,
             filename = filename,
@@ -664,7 +669,7 @@ M.two_column_grep_string = function(opts)
         }
     end
     local sorter = conf.generic_sorter({})
-    sorter.highlighter = function (_,b,c)
+    sorter.highlighter = function(_, b, c)
         local positions = fzy.positions(b, c:sub(0, 40))
         -- highlight the grep prompt in the string
         if opts.search and #opts.search > 0 then
@@ -679,13 +684,13 @@ M.two_column_grep_string = function(opts)
 
     local style = M.dynamic_layout_config()
     builtin.grep_string(vim.tbl_extend("force", opts, {
-        attach_mappings = function(_,_)
+        attach_mappings = function(_, _)
             return true
         end,
         entry_maker = make_entry,
         layout_strategy = "horizontal",
         layout_config = {
-            horizontal = { preview_width = 0.4},
+            horizontal = { preview_width = 0.4 },
             height = style.height,
             width = style.width,
             anchor = style.anchor,
@@ -730,7 +735,7 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
             if last_file ~= file_name then
                 -- close last buffer if it was open
                 if last_bufnr ~= nil and vim.api.nvim_buf_is_loaded(last_bufnr) and not last_was_open then
-                    vim.api.nvim_buf_delete(last_bufnr, {force = true})
+                    vim.api.nvim_buf_delete(last_bufnr, { force = true })
                 end
                 -- load new buffer
                 local bufnr = vim.fn.bufnr(file_name)
@@ -762,7 +767,7 @@ M.get_cached_work_space_symbols_block_info = function(flat_symbols)
         ::continue::
     end
     M.cached_work_space_symbols = M.cached_work_space_symbols_cleaned
-    config.sections.lualine_b = { 'branch' , 'diff', 'diagnostics' }
+    config.sections.lualine_b = { 'branch', 'diff', 'diagnostics' }
     lualine.setup(config)
 end
 
@@ -786,7 +791,7 @@ M.workspace_dynamic = function()
                 name = name:sub(name:find("]") + 2)
             end
 
-            local kind =symbol.kind
+            local kind = symbol.kind
             if kind == "Interface" or kind == "Object" then
                 kind = "Trait"
             end
@@ -798,16 +803,16 @@ M.workspace_dynamic = function()
             return {
                 value = symbol,
                 ordinal = name .. " " .. kind,
-                display = function ()
+                display = function()
                     local t, h = get_highlights({
-                        {filename, return_hl_as_fn("oldWhite"), first_col_width},
-                        {name, return_hl_as_fn("oldWhite"), second_col_width},
-                        {kind, return_hl_as_fn(hl), 10},
+                        { filename, return_hl_as_fn("oldWhite"), first_col_width },
+                        { name,     return_hl_as_fn("oldWhite"), second_col_width },
+                        { kind,     return_hl_as_fn(hl),         10 },
                     })
                     return t, h
                 end,
                 filename = filename,
-                lnum = lnum ,
+                lnum = lnum,
                 col = col,
             }
         end,
@@ -824,7 +829,7 @@ M.workspace_dynamic = function()
                 name = name:sub(name:find("]") + 2)
             end
 
-            local kind =symbol.kind
+            local kind = symbol.kind
             if kind == "Interface" or kind == "Object" then
                 kind = "Trait"
             end
@@ -841,17 +846,17 @@ M.workspace_dynamic = function()
             return {
                 value = symbol,
                 ordinal = name .. " " .. kind,
-                display = function ()
+                display = function()
                     local t, h = get_highlights({
-                        {filename, return_hl_as_fn("oldWhite"), first_col_width},
-                        {name, return_hl_as_fn("oldWhite"), second_col_width},
-                        {kind, return_hl_as_fn(hl), 10},
-                        {custom, highlight_code("rust"), 30},
+                        { filename, return_hl_as_fn("oldWhite"), first_col_width },
+                        { name,     return_hl_as_fn("oldWhite"), second_col_width },
+                        { kind,     return_hl_as_fn(hl),         10 },
+                        { custom,   highlight_code("rust"),      30 },
                     })
                     return t, h
                 end,
                 filename = filename,
-                lnum = lnum ,
+                lnum = lnum,
                 col = col,
             }
         end,
