@@ -9,9 +9,9 @@ require("telescope").setup({
         },
         layout_config = {
             --horizontal = {width = {padding = 0}, height = {padding = 0}}
-            horizontal = {width = 0.9, height = 0.9}
+            horizontal = { width = 0.9, height = 0.9 },
         },
     },
-  })
+})
 -- show line numbers in previewer
 vim.cmd([[autocmd User TelescopePreviewerLoaded setlocal number]])

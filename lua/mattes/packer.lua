@@ -7,9 +7,8 @@ return require('packer').startup(function(use)
     use { "folke/snacks.nvim" }
 
     use {
-        'nvim-telescope/telescope.nvim', tag = '0.1.8',
-        -- or                            , branch = '0.1.x',
-        requires = { { 'nvim-lua/plenary.nvim' } }
+        'nvim-telescope/telescope.nvim', tag = 'v0.2.0',
+        requires = { 'nvim-lua/plenary.nvim' }
     }
 
     use('nvim-treesitter/nvim-treesitter', { run = ':TSUpdate' })

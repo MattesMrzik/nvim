@@ -114,6 +114,7 @@ M.dynamic_layout_config = function()
         width = 0.99,
         --prompt_position = "top",
         anchor = is_bottom and "N" or "S",
+        anchor_padding = 0,
     }
 end
 
@@ -252,6 +253,7 @@ M.custom_lsp_document_symbols = function()
                         width = style.width,
                         anchor = style.anchor,
                     },
+                    anchor_padding = style.anchor_padding,
                 },
             }):find()
         end)
@@ -373,6 +375,7 @@ M.custom_lsp_references = function()
                 height = style.height,
                 width = style.width,
                 anchor = style.anchor,
+                anchor_padding = style.anchor_padding,
             },
         }):find()
     end)
@@ -488,6 +491,7 @@ M.custom_lsp_implementations = function()
                     height = style.height,
                     width = style.width,
                     anchor = style.anchor,
+                    anchor_padding = style.anchor_padding,
                 },
             }):find()
         end)
@@ -623,6 +627,7 @@ M.custom_workspace_symbols = function()
                     height = style.height,
                     width = style.width,
                     anchor = style.anchor,
+                    anchor_padding = style.anchor_padding,
                 },
             }):find()
         end)
@@ -694,6 +699,7 @@ M.two_column_grep_string = function(opts)
             height = style.height,
             width = style.width,
             anchor = style.anchor,
+            anchor_padding = style.anchor_padding,
         },
         results_title = "",
         preview_title = "",

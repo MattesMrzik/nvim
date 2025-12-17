@@ -17,26 +17,31 @@ snacks.setup {
             vertical = {
                 layout = {
                     width = 0.9,
+                    height = 0.47,
                 }
             },
             horizontal = {
                 layout = {
                     width = 0.9,
+                    height = 0.47,
                 }
             },
             dropdown = {
                 layout = {
                     width = 0.9,
+                    height = 0.47,
                 }
             },
             vscode = {
                 layout = {
                     width = 0.9,
+                    height = 0.47,
                 }
             },
             select = {
                 layout = {
                     width = 0.9,
+                    height = 0.47,
                 }
             },
         },

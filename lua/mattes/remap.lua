@@ -33,15 +33,23 @@ vim.keymap.set("n", "<leader>sp",
     function() Snacks.picker.spelling({ layout = { preset = "select", preview = false } }) end)
 vim.keymap.set("n", "<leader>/", function() Snacks.picker.lines() end)
 vim.keymap.set("n", "<leader>fa", function()
+    local cursor_line = vim.fn.winline()
+    local total_lines = vim.api.nvim_win_get_height(0)
+    local is_bottom = cursor_line > total_lines / 2
+
+    local row = 0
+    if not is_bottom then
+        row = total_lines - math.floor(total_lines * 0.47)
+    end
     Snacks.picker.grep({
         layout = {
             layout = {
                 width = 0.99,
-                height = 0.3,
+                height = 0.47,
                 box = "horizontal",
                 position = "float",
                 col = vim.api.nvim_win_get_width(0) * (1 - 0.99) / 2,
-                row = 0,
+                row = row,
             },
         }
     }
