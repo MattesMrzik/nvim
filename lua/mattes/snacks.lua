@@ -13,40 +13,47 @@ snacks.setup {
     picker = {
         enabled = true,
         ui_select = true,
+        sources = {      -- Add this
+            explorer = { -- Move explorer here
+                layout = {
+                    hidden = { "input" }
+                }
+            }
+        },
         layouts = {
             vertical = {
                 layout = {
-                    width = 0.9,
+                    width = 1,
                     height = 0.47,
                 }
             },
             horizontal = {
                 layout = {
-                    width = 0.9,
+                    width = 1,
                     height = 0.47,
                 }
             },
             dropdown = {
                 layout = {
-                    width = 0.9,
+                    width = 0.99,
                     height = 0.47,
                 }
             },
             vscode = {
                 layout = {
-                    width = 0.9,
+                    width = 0.99,
                     height = 0.47,
                 }
             },
             select = {
                 layout = {
-                    width = 0.9,
+                    width = 0.99,
                     height = 0.47,
                 }
             },
         },
     },
-    explorer = { enabled = true, },
+    explorer = { enabled = true },
     notifier = { enabled = true },
     quickfile = { enabled = true },
     scope = { enabled = true },
