@@ -12,6 +12,8 @@ vim.keymap.set("n", "=", [[<cmd>vertical resize +5<cr>]])                       
 vim.keymap.set("n", "+", [[<cmd>vertical resize -5<cr>]])                                                      -- make the window smaller vertically
 vim.keymap.set("n", "-", [[<cmd>horizontal resize +2<cr>]])                                                    -- make the window bigger horizontally by pressing shift and =
 vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]])                                                    -- make the window smaller horizontally by pressing shift and -
+vim.keymap.set("n", "<leader>wr", require("mattes.line_wrap").toggle_line_wrap,
+    { desc = "Toggle line wrap" })
 vim.keymap.set("n", "<leader>gf", function()
     local text = vim.fn.expand("<cfile>")
     print(text)
