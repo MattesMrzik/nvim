@@ -4,7 +4,7 @@ snacks.setup {
     bigfile = { enabled = true },
     dashboard = { enabled = false },
     indent = {
-        enabled = true,
+        enabled = false,
         animate = {
             enabled = false,
         }
