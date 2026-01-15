@@ -1,3 +1,4 @@
+local telescope_border = "#525252"
 require('kanagawa').setup({
     compile = false,  -- enable compiling the colorscheme
     undercurl = true, -- enable undercurls
@@ -37,11 +38,11 @@ require('kanagawa').setup({
         return {
             TelescopeTitle = { fg = theme.ui.special, bold = true },
             TelescopePromptNormal = { bg = nil },
-            TelescopePromptBorder = { fg = "#7da5b3", bg = nil },
+            TelescopePromptBorder = { fg = telescope_border, bg = nil },
             TelescopeResultsNormal = { fg = theme.ui.fg_dim, bg = nil },
-            TelescopeResultsBorder = { fg = "#7da5b3", bg = nil },
+            TelescopeResultsBorder = { fg = telescope_border, bg = nil },
             TelescopePreviewNormal = { bg = nil },
-            TelescopePreviewBorder = { bg = nil, fg = "#7da5b3" },
+            TelescopePreviewBorder = { bg = nil, fg = telescope_border },
             Pmenu = { fg = theme.ui.shade0, bg = theme.ui.bg_p1 }, -- add `blend = vim.o.pumblend` to enable transparency
             PmenuSel = { fg = "NONE", bg = theme.ui.bg_p2 },
             PmenuSbar = { bg = theme.ui.bg_m1 },
@@ -62,7 +63,7 @@ local function transparent_background()
     vim.api.nvim_set_hl(0, "TreesitterContextBottom", { underline = true, sp = "Grey" })
     vim.api.nvim_set_hl(0, "TreesitterContext", { bg = nil })
     vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
-    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = "#85a5b2" })
+    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = telescope_border })
     vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", ctermbg = "NONE" })
 end
 
