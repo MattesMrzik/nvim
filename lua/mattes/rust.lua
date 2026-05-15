@@ -231,8 +231,13 @@ end
 
 cmp.setup({
     window = {
-        completion = require('cmp').config.window.bordered(),
-        documentation = require('cmp').config.window.bordered(),
+        completion = cmp.config.window.bordered {
+            border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+            winhighlight = "Normal:CmpPmenu,CursorLine:PmenuSel,Search:None",
+        },
+        documentation = cmp.config.window.bordered {
+            border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+        },
     },
     preselect = cmp.PreselectMode.None,
     completion = {
