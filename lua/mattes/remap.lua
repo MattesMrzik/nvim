@@ -12,27 +12,50 @@ vim.keymap.set("n", "=", [[<cmd>vertical resize +5<cr>]])                       
 vim.keymap.set("n", "+", [[<cmd>vertical resize -5<cr>]])                                                      -- make the window smaller vertically
 vim.keymap.set("n", "-", [[<cmd>horizontal resize +2<cr>]])                                                    -- make the window bigger horizontally by pressing shift and =
 vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]])                                                    -- make the window smaller horizontally by pressing shift and -
+vim.keymap.set("n", "<C-o>", "<C-o>zz", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>wr", require("mattes.line_wrap").toggle_line_wrap,
     { desc = "Toggle line wrap" })
-vim.keymap.set("n", "<leader>gf", function()
-    local text = vim.fn.expand("<cfile>")
-    print(text)
-    local file, line = text:match("([^:]+):(%d+)")
-    print("File: " .. file .. ", Line: " .. line)
-    if file and line then
-        vim.cmd("edit " .. file)
-        vim.cmd(line)
-    else
-        print("No valid file:line under cursor")
-    end
-end, { desc = "Go to file:line under cursor" })
+-- vim.keymap.set("n", "<leader>gf", function()
+--     local text = vim.fn.expand("<cfile>")
+--     print(text)
+--     local file, line = text:match("([^:]+):(%d+)")
+--     print("File: " .. file .. ", Line: " .. line)
+--     if file and line then
+--         vim.cmd("edit " .. file)
+--         vim.cmd(line)
+--     else
+--         print("No valid file:line under cursor")
+--     end
+-- end, { desc = "Go to file:line under cursor" })
+
+-- quickfix list
+-- see my_quickfix.lua
+-- ctrl + q to open quickfix list with the current search results
 
 -- snacks
 vim.keymap.set("n", "<leader>ch",
     function() Snacks.picker.command_history({ layout = { preset = "dropdown", preview = false } }) end,
     { desc = "Snacks command history picker" })
 vim.keymap.set("n", "<leader>sp",
-    function() Snacks.picker.spelling({ layout = { preset = "select", preview = false } }) end)
+    function()
+        local pos = vim.fn.screenpos(0, vim.fn.line("."), vim.fn.col("."))
+        Snacks.picker.spelling({
+            preset = "select",
+            preview = false,
+            layout = {
+                layout = {
+                    position = "float",
+                    width = 40,    -- choose suitable width
+                    height = 10,   -- choose suitable height
+                    col = pos.col - 1,
+                    row = pos.row, -- +1 to place below cursor
+                    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+
+                },
+            },
+        })
+    end)
 vim.keymap.set("n", "<leader>/", function() Snacks.picker.lines() end)
 vim.keymap.set("n", "<leader>fa", function()
     local cursor_line = vim.fn.winline()
@@ -83,7 +106,9 @@ end, { desc = "Toggle Copilot", silent = true })
 -- diagnostics
 vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1, float = false }) end)
 vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1, float = false }) end)
-
+vim.keymap.set("n", "<leader>dr", function()
+    vim.diagnostic.reset(nil, 0)
+end, { desc = "Reset diagnostics in current buffer" })
 -- trouble
 
 -- undo tree
@@ -96,9 +121,19 @@ vim.keymap.set("n", "<leader>gs", vim.cmd.Git);
 local lspM = require("mattes.rust")
 vim.keymap.set("n", "<leader>gt", lspM.jump_to_trait, { desc = "Go to trait definition from impl" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
-vim.keymap.set("n", "<leader>ih", function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end,
+vim.keymap.set("n", "<leader>ih",
+    function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+    end,
     { desc = "toggle inlay_hints" })
-vim.api.nvim_set_keymap('n', '<leader>,', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>,", function()
+    vim.lsp.buf.definition()
+
+    -- wait 100ms before centering
+    vim.defer_fn(function()
+        vim.cmd("normal! zz")
+    end, 40)
+end, { silent = true })
 vim.keymap.set("n", "K", function() vim.lsp.buf.hover({ border = "rounded" }) end, { desc = "LSP Hover" })
 -- this might cause to give a different namespace to the diagnostics, so that snacks does not see the diagnostics
 vim.keymap.set("n", "<leader>cf", function() lspM:toggle_features() end)
@@ -138,6 +173,9 @@ vim.keymap.set("n", "<leader>fs", function()
         end
     end)
 end, { desc = "Search with grep" })
+vim.keymap.set("n", "<leader>no", function()
+    require('telescope').extensions.notify.notify()
+end, { desc = "Telescope notify" })
 
 vim.keymap.set("n", "<leader>ss", function()
     local fname = vim.api.nvim_buf_get_name(0)
@@ -185,3 +223,19 @@ vim.keymap.set("n", "<leader>m", require("mattes.diffview").jump_between_right_f
     { desc = "Jump between overview and right pane" })
 vim.keymap.set("n", "<leader>fh", function() vim.cmd("DiffviewFileHistory %") end,
     { desc = "Shows the git file history" })
+
+-- opencode
+vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end,
+    { desc = "Ask opencode…" })
+vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end, { desc = "Execute opencode action…" })
+vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
+vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end,
+    { desc = "Add range to opencode", expr = true })
+vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end,
+    { desc = "Add line to opencode", expr = true })
+vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,
+    { desc = "Scroll opencode up" })
+vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end,
+    { desc = "Scroll opencode down" })
+-- vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
+-- vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })

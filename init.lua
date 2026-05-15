@@ -1,3 +1,4 @@
+-- Neovim’s Python provider, not the for the lsp
 vim.g.python3_host_prog = "/Users/mrzi/.config/nvim/python_env/bin/python3"
 require("mattes")
 
@@ -11,8 +12,6 @@ vim.o.expandtab = true
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.o.signcolumn = "yes:2"
-
--- advanced settings
 
 -- flickering fixed, see https://github.com/neovim/neovim/issues/32660
 --vim.g._ts_force_sync_parsing = true
