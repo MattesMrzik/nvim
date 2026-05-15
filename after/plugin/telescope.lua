@@ -5,6 +5,15 @@ require("telescope").setup({
         mappings = {
             i = {
                 ["<esc>"] = actions.close,
+                ["<CR>"] = actions.select_default + actions.center,
+                ["<C-x>"] = actions.select_horizontal + actions.center,
+                ["<C-v>"] = actions.select_vertical + actions.center,
+            },
+            n = {
+                ["<CR>"] = actions.select_default + actions.center,
+                ["<C-x>"] = actions.select_horizontal + actions.center,
+                ["<C-v>"] = actions.select_vertical + actions.center,
+                -- ["<C-t>"] = actions.goto_file_selection_tab + actions.center,
             },
         },
         layout_config = {
