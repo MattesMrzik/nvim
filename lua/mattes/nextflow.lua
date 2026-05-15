@@ -13,3 +13,6 @@ vim.lsp.config['nextflow'] = {
         }
     }
 }
+
+-- to make syntax highlighting work in telescope previewer
+vim.filetype.add({ extension = { nf = "nextflow" } })
