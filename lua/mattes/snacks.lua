@@ -54,10 +54,13 @@ snacks.setup {
         },
     },
     explorer = { enabled = true },
-    notifier = { enabled = true },
+    notifier = { enabled = false },
     quickfile = { enabled = true },
     scope = { enabled = true },
     scroll = { enabled = false },
     statuscolumn = { enabled = true },
     words = { enabled = true },
 }
+-- the notifier above might not be need
+-- with this call below we can now use Telescope notify to see the history of notifications
+vim.notify = require("notify")
