@@ -3,6 +3,7 @@ local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local builtin = require("telescope.builtin")
 local fzy = require("telescope.algos.fzy")
+-- local actions = require("telescope.actions")
 
 local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
@@ -313,7 +314,7 @@ M.custom_lsp_references = function()
     vim.lsp.buf_request(0, "textDocument/references", params, function(err, references, _, _) -- third arg is ctx
         if err or not references or vim.tbl_isempty(references) then
             print(err)
-            vim.notify("No references found", vim.log.levels.INFO)
+            vim.notify("No references found (perhaps this is the only reference)", vim.log.levels.INFO)
             return
         end
 

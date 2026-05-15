@@ -94,6 +94,8 @@ require("diffview").setup({
             vim.wo.wrap = false
             if vim.lsp.inlay_hint then
                 vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+                -- perhaps this instead
+                -- vim.lsp.inlay_hint.enable(false)
             end
         end,
     },                           -- See |diffview-config-hooks|

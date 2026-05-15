@@ -103,4 +103,21 @@ return require('packer').startup(function(use)
     use { 'dyng/ctrlsf.vim' }
 
     use { "lervag/vimtex" }
+
+    use { 'kevinhwang91/nvim-bqf' } -- better quickfix window
+
+    use { "nickjvandyke/opencode.nvim" }
+    -- this was suggested by claude
+    -- use {
+    --     "nickjvandyke/opencode.nvim",
+    --     tag = "*",
+    --     requires = {
+    --         { "folke/snacks.nvim", opt = true },
+    --     },
+    --     config = function()
+    --         require("plugins.opencode")
+    --     end,
+    -- }
+
+    use { 'nextflow-io/vim-language-nextflow' }
 end)
