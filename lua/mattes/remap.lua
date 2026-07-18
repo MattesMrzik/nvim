@@ -225,17 +225,35 @@ vim.keymap.set("n", "<leader>fh", function() vim.cmd("DiffviewFileHistory %") en
     { desc = "Shows the git file history" })
 
 -- opencode
-vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end,
-    { desc = "Ask opencode…" })
-vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end, { desc = "Execute opencode action…" })
-vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
-vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end,
-    { desc = "Add range to opencode", expr = true })
-vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end,
-    { desc = "Add line to opencode", expr = true })
-vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,
-    { desc = "Scroll opencode up" })
-vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end,
-    { desc = "Scroll opencode down" })
+-- vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end,
+--     { desc = "Ask opencode…" })
+-- vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end, { desc = "Execute opencode action…" })
+-- vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
+-- vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end,
+--     { desc = "Add range to opencode", expr = true })
+-- vim.keymap.set("n", "goo", function() return require("opencode").operator("@this ") .. "_" end,
+--     { desc = "Add line to opencode", expr = true })
+-- vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,
+--     { desc = "Scroll opencode up" })
+-- vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end,
+--     { desc = "Scroll opencode down" })
 -- vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
 -- vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+
+-- herdr navigation
+local function herdr_nav(wincmd, dir)
+  local prev = vim.api.nvim_get_current_win()
+  vim.cmd("wincmd " .. wincmd)
+  if vim.api.nvim_get_current_win() ~= prev then
+    return
+  end
+  if vim.env.HERDR_PANE_ID and vim.env.HERDR_PANE_ID ~= "" then
+    local herdr = vim.env.HERDR_BIN_PATH or "herdr"
+    vim.fn.system({ herdr, "pane", "focus", "--direction", dir, "--current" })
+  end
+end
+
+vim.keymap.set("n", "<A-h>", function() herdr_nav("h", "left") end, { silent = true, noremap = true, desc = "Navigate left (vim/herdr)" })
+vim.keymap.set("n", "<A-j>", function() herdr_nav("j", "down") end, { silent = true, noremap = true, desc = "Navigate down (vim/herdr)" })
+vim.keymap.set("n", "<A-k>", function() herdr_nav("k", "up") end, { silent = true, noremap = true, desc = "Navigate up (vim/herdr)" })
+vim.keymap.set("n", "<A-l>", function() herdr_nav("l", "right") end, { silent = true, noremap = true, desc = "Navigate right (vim/herdr)" })

@@ -106,7 +106,7 @@ return require('packer').startup(function(use)
 
     use { 'kevinhwang91/nvim-bqf' } -- better quickfix window
 
-    use { "nickjvandyke/opencode.nvim" }
+    -- use { "nickjvandyke/opencode.nvim" }
     -- this was suggested by claude
     -- use {
     --     "nickjvandyke/opencode.nvim",
@@ -120,4 +120,6 @@ return require('packer').startup(function(use)
     -- }
 
     use { 'nextflow-io/vim-language-nextflow' }
+
+    use { 'paulbkim-dev/vim-herdr-navigation' }
 end)
