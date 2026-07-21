@@ -1,4 +1,7 @@
-require 'nvim-treesitter.configs'.setup {
+# removed the s after config after an update of nvim, where treesitter is no longer a plugin
+# is this config still valid?
+
+require 'nvim-treesitter.config'.setup {
     -- A list of parser names, or "all" (the listed parsers MUST always be installed)
     ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "rust", "groovy", "java" },
 

@@ -63,7 +63,7 @@ return require('packer').startup(function(use)
     -- is a optional requirement for diffview.
     use('nvim-tree/nvim-web-devicons')
 
-    use("nvim-treesitter/playground")
+    -- use("nvim-treesitter/playground")
 
     use {
         "CopilotC-Nvim/CopilotChat.nvim",
