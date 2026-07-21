@@ -12,6 +12,8 @@ vim.o.expandtab = true
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.o.signcolumn = "yes:2"
+vim.opt.splitright = true -- ctrl + v on selected item in telescope
+vim.opt.splitbelow = true -- ctrl + x on selected item in telescope
 
 -- flickering fixed, see https://github.com/neovim/neovim/issues/32660
 --vim.g._ts_force_sync_parsing = true
