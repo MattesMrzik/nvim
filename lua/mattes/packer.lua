@@ -18,6 +18,8 @@ return require('packer').startup(function(use)
 
     use("mbbill/undotree")
 
+    use("folke/flash.nvim")
+
     use("tpope/vim-fugitive")
 
     use('neovim/nvim-lspconfig')
