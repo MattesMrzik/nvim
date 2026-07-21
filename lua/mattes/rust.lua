@@ -312,16 +312,13 @@ cmp.setup({
 --end)
 
 
--- utility method used in remap.lua
-local ts_utils = require("nvim-treesitter.ts_utils")
-
 function M.setup_rust_lsp(feature)
     setup_rust_lsp(feature)
 end
 
 function M.jump_to_trait()
     -- Step 1: Find function_item and extract function name
-    local node = ts_utils.get_node_at_cursor()
+    local node = vim.treesitter.get_node()
     local fn_name = nil
     local search_node = node
     while search_node do
