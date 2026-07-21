@@ -11,11 +11,14 @@ return require('packer').startup(function(use)
         requires = { 'nvim-lua/plenary.nvim' }
     }
 
-    use('nvim-treesitter/nvim-treesitter', { run = ':TSUpdate' })
+    -- the master was deprecated
+    use('nvim-treesitter/nvim-treesitter', { branch = 'main', run = ':TSUpdate' })
 
     use { "rebelot/kanagawa.nvim", as = "kanagawa" }
 
     use("mbbill/undotree")
+
+    use("folke/flash.nvim")
 
     use("tpope/vim-fugitive")
 
@@ -63,6 +66,7 @@ return require('packer').startup(function(use)
     -- is a optional requirement for diffview.
     use('nvim-tree/nvim-web-devicons')
 
+    -- is also outdated
     -- use("nvim-treesitter/playground")
 
     use {
