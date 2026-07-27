@@ -2,7 +2,7 @@
 --   /cfs/earth/scratch/mrzi/software/conda/install_location/bin/conda install -c conda-forge tree-sitter-cli
 -- Symlinked to ~/.local/bin/tree-sitter
 require('nvim-treesitter.install').install({
-    "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "rust", "groovy", "java"
+    "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "rust", "groovy", "java", "python"
 })
 
 require("treesitter-context").setup({
