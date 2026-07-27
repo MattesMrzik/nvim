@@ -1,4 +1,5 @@
 require("mattes.packer")
+require("mattes.treesitter")
 require("mattes.snacks")
 require("mattes.rust")
 require("mattes.my_gitsigns")
