@@ -124,10 +124,17 @@ local function set_copilot_suggestion_color()
     vim.api.nvim_set_hl(0, "CopilotSuggestion", { fg = "#82390d", italic = true })
 end
 
+local function flash_colors()
+    -- FlashLabel for treesitter incremental selection labels
+    -- see after/plugin/flash.lua
+    vim.api.nvim_set_hl(0, "FlashLabel", { fg = "#fb892b" })
+end
+
 transparent_background()
 spelling_underline()
 telescope_colors()
 set_copilot_suggestion_color()
+flash_colors()
 
 -- utility function
 local M = {}
@@ -140,6 +147,7 @@ function M.my_toggle_theme()
         telescope_colors()
         spelling_underline()
         set_copilot_suggestion_color()
+        flash_colors()
         current = 1
     else
         vim.notify("Switching to theme kanagawa-dragon")
@@ -149,6 +157,7 @@ function M.my_toggle_theme()
         spelling_underline()
         transparent_background()
         set_copilot_suggestion_color()
+        flash_colors()
         current = 0
     end
 end
