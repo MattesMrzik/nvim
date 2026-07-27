@@ -1,8 +1,13 @@
+if vim.fn.expand("~") == "/Users/mrzi" then
+    -- local: pyright available homebrew
+else
+    -- pyright is installed via pip in the conda base environment (HPC only)
+    vim.env.PATH = "/cfs/earth/scratch/mrzi/software/conda/install_location/bin:" .. vim.env.PATH
+end
+
 vim.lsp.config("pyright", {
     on_attach = function(client, bufnr)
-        -- Optional: keybindings, formatting settings, etc.
         local opts = { noremap = true, silent = true, buffer = bufnr }
-        -- You can define buffer-local keymaps here if needed
     end,
     settings = {
         python = {
