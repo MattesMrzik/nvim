@@ -1,5 +1,14 @@
--- Neovim’s Python provider, not the for the lsp
-vim.g.python3_host_prog = "/Users/mrzi/.config/nvim/python_env/bin/python3"
+-- Neovim’s Python provider, not for the lsp
+local home = vim.fn.expand("~")
+if home == "/Users/mrzi" then
+    vim.g.python3_host_prog = "/Users/mrzi/.config/nvim/python_env/bin/python3"
+elseif home == "/net/home/mrzi" then
+    vim.g.python3_host_prog = "/cfs/earth/scratch/mrzi/software/conda/install_location/bin/python3"
+else
+    vim.g.python3_host_prog = vim.fn.exepath("python3")
+end
+
+
 require("mattes")
 
 -- basic settings
