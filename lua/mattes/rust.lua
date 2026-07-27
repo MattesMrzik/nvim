@@ -10,11 +10,24 @@ end
 local function setup_rust_lsp(features)
     -- alternatively i could do similar to this: https://rutar.org/writing/rust-analyzer-dynamic-features/
     stop_rust_analyzers()
+    local ra_path
+    if vim.fn.expand("~") == "/Users/mrzi" then
+        ra_path = "/Users/mrzi/.cargo/bin/rust-analyzer"
+    else
+        ra_path = "/cfs/earth/scratch/mrzi/.cargo/bin/rust-analyzer"
+    end
+    local ra_cmd
+    if vim.fn.expand("~") == "/Users/mrzi" then
+        ra_cmd = { ra_path }
+    else
+        ra_cmd = { "env", "RAYON_NUM_THREADS=3", ra_path }
+    end
     vim.lsp.config("rust_analyzer", {
-        cmd = { "/Users/mrzi/.cargo/bin/rust-analyzer" },
+        cmd = ra_cmd,
         settings = {
             ["rust-analyzer"] = {
-                semanticHighlighting = false,
+                -- semanticHighlighting = false, -- Note, I had this previously
+                semanticHighlighting = true,
                 check = { command = "clippy" },
                 cargo = features,
                 diagnostics = { enable = true },
