@@ -1,3 +1,10 @@
+if vim.fn.expand("~") == "/Users/mrzi" then
+    -- local: lua-language-server available via homebrew
+else
+    -- lua-language-server is installed manually in the software dir (HPC only)
+    vim.env.PATH = "/cfs/earth/scratch/mrzi/software/lua-language-server/bin:" .. vim.env.PATH
+end
+
 vim.lsp.config("lua_ls", {
     settings = {
         Lua = {
