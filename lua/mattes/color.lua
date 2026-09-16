@@ -142,15 +142,14 @@ local current = 0
 
 function M.my_toggle_theme()
     if current == 0 then
-        vim.notify("Switching to theme kanagawa-lotus")
         vim.cmd("colorscheme kanagawa-lotus")
         telescope_colors()
         spelling_underline()
         set_copilot_suggestion_color()
         flash_colors()
         current = 1
+        vim.notify("Switching to theme kanagawa-lotus", vim.log.levels.INFO, { timeout = 500 })
     else
-        vim.notify("Switching to theme kanagawa-dragon")
         require("kanagawa").setup({ theme = "dragon" })
         vim.cmd("colorscheme kanagawa")
         telescope_colors()
@@ -159,6 +158,7 @@ function M.my_toggle_theme()
         set_copilot_suggestion_color()
         flash_colors()
         current = 0
+        vim.notify("Switching to theme kanagawa-dragon", vim.log.levels.INFO, { timeout = 500 })
     end
 end
 
