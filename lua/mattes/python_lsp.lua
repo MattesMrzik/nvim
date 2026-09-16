@@ -2,6 +2,7 @@ if vim.fn.expand("~") == "/Users/mrzi" then
     -- local: pyright available homebrew
 else
     -- pyright is installed via pip in the conda base environment (HPC only)
+    -- make sure to install: /cfs/earth/scratch/mrzi/software/conda/install_location/bin/pip install "pyright[nodejs]"
     vim.env.PATH = "/cfs/earth/scratch/mrzi/software/conda/install_location/bin:" .. vim.env.PATH
 end
 
