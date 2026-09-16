@@ -2,7 +2,7 @@
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>e", function() Snacks.explorer() end)
 vim.keymap.set("v", "cc", '"+y')
-vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
+vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { desc = "Rename symbol" }) -- see pyright fix in lua/mattes/lsp.lua
 vim.keymap.set("n", "<leader>th", require("mattes.color").my_toggle_theme, { desc = "Toggle theme" })
 vim.keymap.set("n", "<C-j>", "<C-e>", { noremap = true, desc = "Scroll view down" })
 vim.keymap.set("n", "<C-k>", "<C-y>", { noremap = true, desc = "Scroll view up" })
@@ -16,6 +16,10 @@ vim.keymap.set("n", "<C-o>", "<C-o>zz", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>wr", require("mattes.line_wrap").toggle_line_wrap,
     { desc = "Toggle line wrap" })
+-- gcc provided by Comment.nvim (packer.lua:100)
+-- fix applied to ft.lua:296: `if not ok or not parser then`
+-- see https://github.com/numToStr/Comment.nvim/pull/518
+
 -- vim.keymap.set("n", "<leader>gf", function()
 --     local text = vim.fn.expand("<cfile>")
 --     print(text)
@@ -242,18 +246,22 @@ vim.keymap.set("n", "<leader>fh", function() vim.cmd("DiffviewFileHistory %") en
 
 -- herdr navigation
 local function herdr_nav(wincmd, dir)
-  local prev = vim.api.nvim_get_current_win()
-  vim.cmd("wincmd " .. wincmd)
-  if vim.api.nvim_get_current_win() ~= prev then
-    return
-  end
-  if vim.env.HERDR_PANE_ID and vim.env.HERDR_PANE_ID ~= "" then
-    local herdr = vim.env.HERDR_BIN_PATH or "herdr"
-    vim.fn.system({ herdr, "pane", "focus", "--direction", dir, "--current" })
-  end
+    local prev = vim.api.nvim_get_current_win()
+    vim.cmd("wincmd " .. wincmd)
+    if vim.api.nvim_get_current_win() ~= prev then
+        return
+    end
+    if vim.env.HERDR_PANE_ID and vim.env.HERDR_PANE_ID ~= "" then
+        local herdr = vim.env.HERDR_BIN_PATH or "herdr"
+        vim.fn.system({ herdr, "pane", "focus", "--direction", dir, "--current" })
+    end
 end
 
-vim.keymap.set("n", "<A-h>", function() herdr_nav("h", "left") end, { silent = true, noremap = true, desc = "Navigate left (vim/herdr)" })
-vim.keymap.set("n", "<A-j>", function() herdr_nav("j", "down") end, { silent = true, noremap = true, desc = "Navigate down (vim/herdr)" })
-vim.keymap.set("n", "<A-k>", function() herdr_nav("k", "up") end, { silent = true, noremap = true, desc = "Navigate up (vim/herdr)" })
-vim.keymap.set("n", "<A-l>", function() herdr_nav("l", "right") end, { silent = true, noremap = true, desc = "Navigate right (vim/herdr)" })
+vim.keymap.set("n", "<A-h>", function() herdr_nav("h", "left") end,
+    { silent = true, noremap = true, desc = "Navigate left (vim/herdr)" })
+vim.keymap.set("n", "<A-j>", function() herdr_nav("j", "down") end,
+    { silent = true, noremap = true, desc = "Navigate down (vim/herdr)" })
+vim.keymap.set("n", "<A-k>", function() herdr_nav("k", "up") end,
+    { silent = true, noremap = true, desc = "Navigate up (vim/herdr)" })
+vim.keymap.set("n", "<A-l>", function() herdr_nav("l", "right") end,
+    { silent = e, noremap = true, desc = "Navigate right (vim/herdr)" })

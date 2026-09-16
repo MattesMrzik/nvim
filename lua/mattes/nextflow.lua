@@ -30,3 +30,7 @@ vim.lsp.config['nextflow'] = {
 
 -- to make syntax highlighting work in telescope previewer
 vim.filetype.add({ extension = { nf = "nextflow" } })
+
+-- spell fix in after/syntax/nextflow.vim:
+-- groovy.vim has `syntax spell default` + `let b:spell_options="contained"`
+-- which restrict spell checking to @Spell regions (comments+strings only)

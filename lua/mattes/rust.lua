@@ -26,7 +26,7 @@ local function setup_rust_lsp(features)
         cmd = ra_cmd,
         settings = {
             ["rust-analyzer"] = {
-                semanticHighlighting = false,
+                semanticHighlighting = { enabled = false }, -- semanticHighlighting = true,
                 check = { command = "clippy" },
                 cargo = features,
                 diagnostics = { enable = true },
