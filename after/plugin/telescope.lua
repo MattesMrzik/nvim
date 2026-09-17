@@ -20,33 +20,17 @@ local function select_same_buffer(prompt_bufnr, picker, win)
         vim.fn.settagstack(vim.fn.win_getid(), { items = items }, "t")
     end
 
-    local row = entry.row or entry.lnum
-    local col = entry.col
-    local pos = vim.api.nvim_win_get_cursor(0)
-    if col == nil then
-        if row == pos[1] then
-            col = pos[2] + 1
-        elseif row == nil then
-            row, col = pos[1], pos[2] + 1
-        else
-            col = 1
-        end
+    local row = (entry.row or entry.lnum) or vim.fn.line(".")
+    local col = math.max(0, (entry.col or vim.fn.col(".")) - 1)
+    pcall(vim.cmd, "normal! " .. row .. "G")
+
+    local line = vim.api.nvim_get_current_line()
+    while col < #line do
+        local ch = line:sub(col, col)
+        if ch ~= "." and ch ~= ":" then break end
+        col = col + 1
     end
-    if col and col > 0 then
-        col = col - 1
-    end
-    if row and col then
-        pcall(vim.cmd, "normal! " .. row .. "G")
-        vim.api.nvim_win_set_cursor(0, { row, col })
-        local line = vim.api.nvim_get_current_line()
-        local c = col
-        while c < #line do
-            local ch = line:sub(c, c)
-            if ch ~= "." and ch ~= ":" then break end
-            c = c + 1
-        end
-        vim.api.nvim_win_set_cursor(0, { row, c })
-    end
+    vim.api.nvim_win_set_cursor(0, { row, col })
 end
 
 local function entry_in_window(entry, win)
