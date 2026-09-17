@@ -12,8 +12,31 @@ vim.keymap.set("n", "=", [[<cmd>vertical resize +5<cr>]])                       
 vim.keymap.set("n", "+", [[<cmd>vertical resize -5<cr>]])                                                      -- make the window smaller vertically
 vim.keymap.set("n", "-", [[<cmd>horizontal resize +2<cr>]])                                                    -- make the window bigger horizontally by pressing shift and =
 vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]])                                                    -- make the window smaller horizontally by pressing shift and -
-vim.keymap.set("n", "<C-o>", "<C-o>zz", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-i>", "<C-i>zz", { noremap = true, silent = true })
+local maybe_center = require("mattes.center").maybe_center
+
+vim.keymap.set("n", "<C-o>", function()
+    local top, bottom = vim.fn.line("w0"), vim.fn.line("w$")
+    vim.api.nvim_feedkeys(vim.keycode("<C-o>"), "nx", false)
+    maybe_center(top, bottom)
+end, { noremap = true, silent = true })
+
+vim.keymap.set("n", "<C-i>", function()
+    local top, bottom = vim.fn.line("w0"), vim.fn.line("w$")
+    vim.api.nvim_feedkeys(vim.keycode("<C-i>"), "nx", false)
+    maybe_center(top, bottom)
+end, { noremap = true, silent = true })
+
+vim.keymap.set("n", "n", function()
+    local top, bottom = vim.fn.line("w0"), vim.fn.line("w$")
+    vim.cmd("normal! n")
+    maybe_center(top, bottom)
+end, { noremap = true, silent = true })
+
+vim.keymap.set("n", "N", function()
+    local top, bottom = vim.fn.line("w0"), vim.fn.line("w$")
+    vim.cmd("normal! N")
+    maybe_center(top, bottom)
+end, { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>wr", require("mattes.line_wrap").toggle_line_wrap,
     { desc = "Toggle line wrap" })
 -- gcc provided by Comment.nvim (packer.lua:100)
@@ -131,11 +154,12 @@ vim.keymap.set("n", "<leader>ih",
     end,
     { desc = "toggle inlay_hints" })
 vim.keymap.set("n", "<leader>,", function()
+    local top, bottom = vim.fn.line("w0"), vim.fn.line("w$")
     vim.lsp.buf.definition()
 
     -- wait 100ms before centering
     vim.defer_fn(function()
-        vim.cmd("normal! zz")
+        maybe_center(top, bottom)
     end, 40)
 end, { silent = true })
 vim.keymap.set("n", "K", function() vim.lsp.buf.hover({ border = "rounded" }) end, { desc = "LSP Hover" })
@@ -210,6 +234,7 @@ end)
 --vim.keymap.set('n', '<C-[>', '<cmd>Telescope lsp_references<CR>', { desc = "Search symbols in current file" })
 --vim.keymap.set("n", "<C-[>", function()
 vim.keymap.set("n", "<leader>k", function()
+    require("mattes.picker_vp").before_picker()
     local fname = vim.api.nvim_buf_get_name(0)
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_references()
