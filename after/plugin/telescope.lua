@@ -66,13 +66,8 @@ local function select_and_center(prompt_bufnr, how)
         action_set.select(prompt_bufnr, how)
     end
 
-    if not vim.api.nvim_win_is_valid(win) then return end
-    local cur = vim.api.nvim_win_get_cursor(win)
-    if cur[1] < top or cur[1] > bot then
-        vim.api.nvim_win_call(win, function()
-            vim.cmd "normal! zz"
-        end)
-    end
+    -- center only if the target was outside the pre-picker viewport
+    require("mattes.center").maybe_center(top, bot)
 end
 
 require("telescope").setup({
