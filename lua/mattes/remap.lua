@@ -288,4 +288,4 @@ vim.keymap.set("n", "<A-j>", function() herdr_nav("j", "down") end,
 vim.keymap.set("n", "<A-k>", function() herdr_nav("k", "up") end,
     { silent = true, noremap = true, desc = "Navigate up (vim/herdr)" })
 vim.keymap.set("n", "<A-l>", function() herdr_nav("l", "right") end,
-    { silent = e, noremap = true, desc = "Navigate right (vim/herdr)" })
+    { silent = true, noremap = true, desc = "Navigate right (vim/herdr)" })
