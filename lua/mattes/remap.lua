@@ -234,7 +234,6 @@ end)
 --vim.keymap.set('n', '<C-[>', '<cmd>Telescope lsp_references<CR>', { desc = "Search symbols in current file" })
 --vim.keymap.set("n", "<C-[>", function()
 vim.keymap.set("n", "<leader>k", function()
-    require("mattes.picker_vp").before_picker()
     local fname = vim.api.nvim_buf_get_name(0)
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_references()

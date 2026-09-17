@@ -21,7 +21,7 @@ local function select_same_buffer(prompt_bufnr, picker, win)
     end
 
     local row = (entry.row or entry.lnum) or vim.fn.line(".")
-    local col = math.max(0, (entry.col or vim.fn.col(".")) - 1)
+    local col = entry.col or vim.fn.col(".")
     pcall(vim.cmd, "normal! " .. row .. "G")
 
     local line = vim.api.nvim_get_current_line()
@@ -57,6 +57,8 @@ local function select_and_center(prompt_bufnr, how)
     local picker = action_state.get_current_picker(prompt_bufnr)
     local win = picker.original_win_id
     local entry = action_state.get_selected_entry()
+    local top = vim.fn.line("w0", win)
+    local bot = vim.fn.line("w$", win)
 
     if how == "default" and entry_in_window(entry, win) then
         select_same_buffer(prompt_bufnr, picker, win)
@@ -64,9 +66,13 @@ local function select_and_center(prompt_bufnr, how)
         action_set.select(prompt_bufnr, how)
     end
 
-    vim.defer_fn(function()
-        require("mattes.picker_vp").settle(win)
-    end, 25)
+    if not vim.api.nvim_win_is_valid(win) then return end
+    local cur = vim.api.nvim_win_get_cursor(win)
+    if cur[1] < top or cur[1] > bot then
+        vim.api.nvim_win_call(win, function()
+            vim.cmd "normal! zz"
+        end)
+    end
 end
 
 require("telescope").setup({
