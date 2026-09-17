@@ -6,10 +6,10 @@ function M.maybe_center(top, bottom, buf, win)
         -- landed in a different window (split/tab selection) -> center
         if vim.api.nvim_get_current_win() ~= win then
             should_center = true
-        -- buffer in the window changed -> old viewport is meaningless -> center
+            -- buffer in the window changed -> old viewport is meaningless -> center
         elseif buf and vim.api.nvim_win_get_buf(win) ~= buf then
             should_center = true
-        -- same buffer: center only if the target was outside the old viewport
+            -- same buffer: center only if the target was outside the old viewport
         elseif top and bottom and top < bottom then
             local line = vim.fn.line(".")
             should_center = line < top or line > bottom
@@ -26,3 +26,4 @@ function M.maybe_center(top, bottom, buf, win)
 end
 
 return M
+

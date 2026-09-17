@@ -8,6 +8,7 @@ local fzy = require("telescope.algos.fzy")
 local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
 local highlight = require("snacks.picker.util.highlight")
+local picker_select = require("mattes.picker_select")
 local M = {}
 local kind_icons = {
     Text = "",
@@ -247,6 +248,7 @@ M.custom_lsp_document_symbols = function()
                 }),
                 previewer = conf.qflist_previewer({}),
                 sorter = sorter,
+                attach_mappings = picker_select.attach_mappings(),
                 layout_config = {
                     horizontal = {
                         preview_width = 0.4, -- percent of total width; default is 0.5
@@ -371,6 +373,7 @@ M.custom_lsp_references = function()
             }),
             previewer = conf.qflist_previewer({}),
             sorter = sorter,
+            attach_mappings = picker_select.attach_mappings(),
             layout_config = {
                 horizontal = { preview_width = 0.4 },
                 height = style.height,
@@ -487,6 +490,7 @@ M.custom_lsp_implementations = function()
                 }),
                 previewer = conf.qflist_previewer({}),
                 sorter = sorter,
+                attach_mappings = picker_select.attach_mappings(),
                 layout_config = {
                     horizontal = { preview_width = 0.4 },
                     height = style.height,
@@ -623,6 +627,7 @@ M.custom_workspace_symbols = function()
                 }),
                 previewer = conf.qflist_previewer({}),
                 sorter = sorter,
+                attach_mappings = picker_select.attach_mappings(),
                 layout_config = {
                     horizontal = { preview_width = 0.4 },
                     height = style.height,

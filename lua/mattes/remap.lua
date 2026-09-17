@@ -221,7 +221,7 @@ vim.keymap.set("n", "<leader>ss", function()
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_document_symbols()
     else
-        require("telescope.builtin").lsp_document_symbols()
+        require("telescope.builtin").lsp_document_symbols({ attach_mappings = require("mattes.picker_select").attach_mappings() })
     end
 end, { desc = "Search symbols in current file" })
 -- this is just the same as >im, because i sometime mistype it
@@ -230,7 +230,7 @@ vim.keymap.set("n", "<leader>in", function()
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_implementations()
     else
-        require("telescope.builtin").lsp_implementations()
+        require("telescope.builtin").lsp_implementations({ attach_mappings = require("mattes.picker_select").attach_mappings() })
     end
 end)
 vim.keymap.set("n", "<leader>im", function()
@@ -238,7 +238,7 @@ vim.keymap.set("n", "<leader>im", function()
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_implementations()
     else
-        require("telescope.builtin").lsp_implementations()
+        require("telescope.builtin").lsp_implementations({ attach_mappings = require("mattes.picker_select").attach_mappings() })
     end
 end)
 --vim.keymap.set('n', '<C-[>', '<cmd>Telescope lsp_references<CR>', { desc = "Search symbols in current file" })
@@ -248,7 +248,7 @@ vim.keymap.set("n", "<leader>k", function()
     if fname:sub(-3) == ".rs" then
         cs.custom_lsp_references()
     else
-        require("telescope.builtin").lsp_references()
+        require("telescope.builtin").lsp_references({ attach_mappings = require("mattes.picker_select").attach_mappings() })
     end
 end, { desc = "Search references" })
 -- // make this call the normal snacks picker if not in rust project (rust lsp)
