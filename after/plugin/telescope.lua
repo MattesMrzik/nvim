@@ -80,6 +80,7 @@ local function select_and_center(prompt_bufnr, how)
     -- snapshot the viewport before the jump so we can tell off-screen targets
     local top = vim.fn.line("w0", win)
     local bot = vim.fn.line("w$", win)
+    local buf = vim.api.nvim_win_get_buf(win)
 
     -- same-buffer: jump without re-reading the file; otherwise let telescope do it
     if how == "default" and entry_in_same_window(entry, win) then
@@ -90,7 +91,7 @@ local function select_and_center(prompt_bufnr, how)
     end
 
     -- center only if the target was outside the pre-picker viewport
-    require("mattes.center").maybe_center(top, bot)
+    require("mattes.center").maybe_center(top, bot, buf, win)
 end
 
 require("telescope").setup({
