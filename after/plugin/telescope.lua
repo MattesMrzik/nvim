@@ -30,7 +30,7 @@ local function select_same_buffer(prompt_bufnr, picker, win)
     -- jump to the target line (G pushes the call site onto the jumplist)
     local row = (entry.row or entry.lnum) or vim.fn.line(".")
     local col = entry.col or vim.fn.col(".")
-    pcall(vim.cmd, "normal! " .. row .. "G")
+    pcall(function() vim.cmd("normal! " .. row .. "G") end)
 
     -- telescope's col is 1-based and points at the start of the token;
     -- land on the identifier, skipping a leading `.` / `::`
